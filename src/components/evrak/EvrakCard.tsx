@@ -1,4 +1,4 @@
-import type { EvrakItem } from '@shared/types';
+import type { EvrakItem } from '@/types';
 
 interface EvrakCardProps {
   evrak: EvrakItem;

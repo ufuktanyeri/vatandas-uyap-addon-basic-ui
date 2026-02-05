@@ -8,12 +8,13 @@ import {
   tumunuSec,
   secimiTemizle,
   sessionExpired
-} from '@shared/signals';
-import { Downloader } from '../downloader';
-import { EvrakList } from './EvrakList';
-import { ProgressBar } from './ProgressBar';
-import { SessionAlert } from './SessionAlert';
-import { Button, useToast } from '@components/index';
+} from '@store';
+import { Downloader } from '@content/downloader';
+import { EvrakList } from '@components/evrak/EvrakList';
+import { ProgressBar } from '@components/ui/ProgressBar';
+import { SessionAlert } from '@components/ui/SessionAlert';
+import { Button } from '@components/ui/Button';
+import { useToast } from '@hooks';
 
 interface SidebarProps {
   onClose: () => void;
@@ -103,7 +104,7 @@ export function Sidebar({ onClose }: SidebarProps) {
                        indirmeDurumu.value.status === 'paused';
 
   return (
-    <div class="uyap-ext-sidebar">
+    <div class="uyap-ext-panel">
       {/* Header */}
       <div class="uyap-flex uyap-items-center uyap-justify-between uyap-p-4 uyap-border-b uyap-border-gray-200 uyap-bg-white">
         <h2 class="uyap-text-lg uyap-font-semibold uyap-text-gray-900">

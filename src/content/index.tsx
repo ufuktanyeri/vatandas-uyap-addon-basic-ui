@@ -8,17 +8,15 @@ import {
 } from './scanner';
 import {
   evraklar,
-  sidebarVisible,
   dosyaBilgileri,
   sessionExpired,
   indirmeDurumu,
   updateDownloadProgress,
   kisiAdi
-} from '@shared/signals';
-import type { DownloadProgressPayload } from '@shared/types';
+} from '@store';
+import type { DownloadProgressPayload } from '@/types';
 import { resolveDownloadProgress } from './downloader';
-import { SELECTORS } from '@shared/constants';
-import { onMessage } from '@shared/messages';
+import { SELECTORS, onMessage } from '@lib';
 import '@/styles/sidebar.css';
 
 console.log('UYAP Extension: Content script loaded');
@@ -59,9 +57,6 @@ async function initExtension() {
       kisiAdi: kisiAdiValue
     });
 
-    // Show sidebar
-    sidebarVisible.value = true;
-
     // Render Preact app
     renderApp();
 
@@ -97,7 +92,6 @@ function cleanupExtension() {
   }
 
   isInitialized = false;
-  sidebarVisible.value = false;
   evraklar.value = [];
   dosyaBilgileri.value = null;
   sessionExpired.value = false;

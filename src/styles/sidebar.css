@@ -2,53 +2,114 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Sidebar container - fixed to right side of UYAP modal */
-.uyap-ext-sidebar {
-  position: fixed;
-  right: 0;
-  top: 0;
-  width: 320px;
-  height: 100vh;
-  background: white;
-  border-left: 1px solid #e5e7eb;
-  z-index: 10000;
-  overflow-y: auto;
+/* Panel content inside modal */
+.uyap-ext-panel {
   font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  box-shadow: -2px 0 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
 
 /* Scrollbar styling */
-.uyap-ext-sidebar::-webkit-scrollbar {
+.uyap-ext-panel::-webkit-scrollbar,
+.uyap-ext-modal-content::-webkit-scrollbar {
   width: 8px;
 }
 
-.uyap-ext-sidebar::-webkit-scrollbar-track {
+.uyap-ext-panel::-webkit-scrollbar-track,
+.uyap-ext-modal-content::-webkit-scrollbar-track {
   background: #f1f1f1;
 }
 
-.uyap-ext-sidebar::-webkit-scrollbar-thumb {
+.uyap-ext-panel::-webkit-scrollbar-thumb,
+.uyap-ext-modal-content::-webkit-scrollbar-thumb {
   background: #888;
   border-radius: 4px;
 }
 
-.uyap-ext-sidebar::-webkit-scrollbar-thumb:hover {
+.uyap-ext-panel::-webkit-scrollbar-thumb:hover,
+.uyap-ext-modal-content::-webkit-scrollbar-thumb:hover {
   background: #555;
 }
 
 /* Reset default styles that might conflict with UYAP */
-.uyap-ext-sidebar * {
+.uyap-ext-panel * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
 }
 
-.uyap-ext-sidebar button {
+.uyap-ext-panel button {
   font-family: inherit;
   cursor: pointer;
 }
 
-.uyap-ext-sidebar input[type="checkbox"] {
+.uyap-ext-panel input[type="checkbox"] {
   cursor: pointer;
+}
+
+/* FAB - Floating Action Button */
+.uyap-ext-fab {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  z-index: 10000;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background-color: #2563eb;
+  color: white;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+  transition: background-color 0.2s, transform 0.2s, box-shadow 0.2s;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+.uyap-ext-fab:hover {
+  background-color: #1d4ed8;
+  transform: scale(1.05);
+  box-shadow: 0 6px 16px rgba(37, 99, 235, 0.5);
+}
+
+.uyap-ext-fab:active {
+  transform: scale(0.95);
+}
+
+/* Modal overlay */
+.uyap-ext-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10001;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+/* Modal box */
+.uyap-ext-modal {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  width: 400px;
+  max-width: 90vw;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Modal content area */
+.uyap-ext-modal-content {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
 }
 
 /* Progress bar animation */

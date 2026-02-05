@@ -1,10 +1,10 @@
-import type { EvrakItem, DosyaBilgileri } from '@shared/types';
+import type { EvrakItem, DosyaBilgileri } from '@/types';
 import {
   SELECTORS,
   SKIP_FOLDERS,
-  DEFAULT_YARGI_TURU
-} from '@shared/constants';
-import { sanitizeName } from '@shared/filename';
+  DEFAULT_YARGI_TURU,
+  sanitizeName
+} from '@lib';
 
 /**
  * Get yargiTuru with fallback chain

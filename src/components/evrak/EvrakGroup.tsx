@@ -1,11 +1,11 @@
 import { useState } from 'preact/hooks';
-import type { EvrakItem } from '@shared/types';
+import type { EvrakItem } from '@/types';
 import {
   seciliEvrakIds,
   toggleEvrakSecimi,
   klasorEvraklariniSec,
   klasorEvraklariniKaldir
-} from '@shared/signals';
+} from '@store';
 import { EvrakCard } from './EvrakCard';
 
 interface EvrakGroupProps {

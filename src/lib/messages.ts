@@ -1,4 +1,4 @@
-import type { Message, MessageType } from './types';
+import type { Message, MessageType } from '@/types';
 
 /**
  * Send a message to the background service worker

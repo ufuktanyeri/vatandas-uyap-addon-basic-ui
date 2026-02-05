@@ -3,10 +3,10 @@ import type {
   DosyaBilgileri,
   DownloadProgress,
   DownloadProgressPayload
-} from '@shared/types';
+} from '@/types';
 import { getYargiTuru } from './scanner';
-import { ayarlar, sessionExpired } from '@shared/signals';
-import { sendToBackground } from '@shared/messages';
+import { ayarlar, sessionExpired } from '@store';
+import { sendToBackground } from '@lib';
 
 // Registry of pending download promises (resolved by message handler in index.tsx)
 const pendingResolvers = new Map<string, (payload: DownloadProgressPayload) => void>();

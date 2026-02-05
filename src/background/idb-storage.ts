@@ -1,4 +1,4 @@
-import { IDB_CONFIG } from '@shared/constants';
+import { IDB_CONFIG } from '@lib';
 
 let dbInstance: IDBDatabase | null = null;
 

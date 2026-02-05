@@ -5,8 +5,8 @@ import type {
   DownloadState,
   Settings,
   ExportData
-} from './types';
-import { DEFAULT_SETTINGS } from './constants';
+} from '@/types';
+import { DEFAULT_SETTINGS } from '@lib';
 
 // Core state
 export const evraklar = signal<EvrakItem[]>([]);
@@ -19,9 +19,6 @@ export const ayarlar = signal<Settings>({ ...DEFAULT_SETTINGS });
 
 // Export data (delta sync için)
 export const mevcutExport = signal<ExportData | null>(null);
-
-// Sidebar visibility
-export const sidebarVisible = signal<boolean>(false);
 
 // Session state
 export const sessionExpired = signal<boolean>(false);

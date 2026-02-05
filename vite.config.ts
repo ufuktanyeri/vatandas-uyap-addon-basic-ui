@@ -12,7 +12,9 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': '/src',
-      '@shared': '/src/shared',
+      '@store': '/src/store',
+      '@lib': '/src/lib',
+      '@hooks': '/src/hooks',
       '@content': '/src/content',
       '@popup': '/src/popup',
       '@background': '/src/background',

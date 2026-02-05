@@ -1,5 +1,5 @@
-import { MAGIC_BYTES, MIME_TYPES, FILE_EXTENSIONS } from '@shared/constants';
-import type { Message } from '@shared/types';
+import { MAGIC_BYTES, MIME_TYPES, FILE_EXTENSIONS } from '@lib';
+import type { Message } from '@/types';
 import { loadDirectoryHandle } from './idb-storage';
 
 /**

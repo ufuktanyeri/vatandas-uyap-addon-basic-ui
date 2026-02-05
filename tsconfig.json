@@ -25,7 +25,12 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"],
-      "@shared/*": ["src/shared/*"],
+      "@store": ["src/store/index.ts"],
+      "@store/*": ["src/store/*"],
+      "@lib": ["src/lib/index.ts"],
+      "@lib/*": ["src/lib/*"],
+      "@hooks": ["src/hooks/index.ts"],
+      "@hooks/*": ["src/hooks/*"],
       "@content/*": ["src/content/*"],
       "@popup/*": ["src/popup/*"],
       "@background/*": ["src/background/*"],

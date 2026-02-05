@@ -1,10 +1,10 @@
-import type { Message } from '@shared/types';
+import type { Message } from '@/types';
 import {
   saveDirectoryHandle,
   loadDirectoryHandle,
   verifyDirectoryPermission
 } from './idb-storage';
-import { STORAGE_KEYS } from '@shared/constants';
+import { STORAGE_KEYS } from '@lib';
 import {
   queueDownloadMetadata,
   cancelAllDownloads

@@ -1,4 +1,4 @@
-import type { ExportData, EvrakItem, DosyaBilgileri } from './types';
+import type { ExportData, EvrakItem, DosyaBilgileri } from '@/types';
 import { EXPORT_FILE_NAME } from './constants';
 
 /**

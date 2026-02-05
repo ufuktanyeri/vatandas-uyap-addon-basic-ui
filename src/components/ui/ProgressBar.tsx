@@ -1,4 +1,4 @@
-import { indirmeDurumu, indirmeYuzdesi } from '@shared/signals';
+import { indirmeDurumu, indirmeYuzdesi } from '@store';
 
 export function ProgressBar() {
   const durumu = indirmeDurumu.value;

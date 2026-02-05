@@ -1,5 +1,5 @@
-import { sessionExpired } from '@shared/signals';
-import { Button } from '@components/Button';
+import { sessionExpired } from '@store';
+import { Button } from './Button';
 
 interface SessionAlertProps {
   onClose: () => void;

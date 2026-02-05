@@ -1,6 +1,6 @@
-import { grupluEvraklar, deltaInfo } from '@shared/signals';
+import { grupluEvraklar, deltaInfo } from '@store';
 import { EvrakGroup } from './EvrakGroup';
-import { EmptyState } from '@components/EmptyState';
+import { EmptyState } from '@components/ui/EmptyState';
 
 export function EvrakList() {
   const groups = grupluEvraklar.value;

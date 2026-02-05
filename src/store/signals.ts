@@ -4,7 +4,8 @@ import type {
   DosyaBilgileri,
   DownloadState,
   Settings,
-  ExportData
+  ExportData,
+  PaginationInfo
 } from '@/types';
 import { DEFAULT_SETTINGS } from '@lib';
 
@@ -22,6 +23,9 @@ export const mevcutExport = signal<ExportData | null>(null);
 
 // Session state
 export const sessionExpired = signal<boolean>(false);
+
+// Pagination state (filetree has multiple pages)
+export const paginationInfo = signal<PaginationInfo | null>(null);
 
 // User identity (for export manifest)
 export const kisiAdi = signal<string>('');

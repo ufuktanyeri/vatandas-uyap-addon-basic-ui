@@ -1,47 +1,89 @@
-import { render } from 'preact';
-import { App } from './ui/App';
+import "@/styles/sidebar.css";
+import { SELECTORS } from "@lib";
 import {
-  scanFiletree,
-  getDosyaBilgileri,
-  findKisiAdi,
-  waitForFiletree
-} from './scanner';
-import {
-  evraklar,
   dosyaBilgileri,
+  evraklar,
+  kisiAdi,
+  paginationInfo,
   sessionExpired,
-  indirmeDurumu,
-  updateDownloadProgress,
-  kisiAdi
-} from '@store';
-import type { DownloadProgressPayload } from '@/types';
-import { resolveDownloadProgress } from './downloader';
-import { SELECTORS, onMessage } from '@lib';
-import '@/styles/sidebar.css';
+} from "@store";
+import { render } from "preact";
+import {
+  detectPagination,
+  findKisiAdi,
+  getDosyaBilgileri,
+  scanFiletree,
+  waitForFiletree,
+} from "./scanner";
+import { App } from "./ui/App";
 
-console.log('UYAP Extension: Content script loaded');
+console.log("UYAP Extension: Content script loaded");
 
 let appContainer: HTMLDivElement | null = null;
 let isInitialized = false;
+
+/**
+ * Wait for UYAP dosya_bilgileri global object to become available
+ * This object is only set when a specific case/dosya is opened,
+ * NOT on the main portal page.
+ */
+function waitForDosyaBilgileri(timeout = 10000): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const startTime = Date.now();
+
+    const check = () => {
+      if ((window as any).dosya_bilgileri) {
+        resolve();
+        return;
+      }
+
+      if (Date.now() - startTime > timeout) {
+        reject(new Error("dosya_bilgileri not available - not a dosya detail page"));
+        return;
+      }
+
+      setTimeout(check, 500);
+    };
+
+    check();
+  });
+}
 
 /**
  * Initialize the extension when UYAP modal is detected
  */
 async function initExtension() {
   if (isInitialized) {
-    console.log('Extension already initialized');
+    console.log("Extension already initialized");
     return;
   }
 
-  try {
-    console.log('Initializing extension...');
+  // Set flag immediately to prevent race conditions
+  isInitialized = true;
 
-    // Wait for filetree to load
-    await waitForFiletree();
+  try {
+    console.log("Initializing extension...");
+
+    // Wait for dosya_bilgileri to be available first
+    // This ensures we're on a dosya detail page, not the main portal
+    await waitForDosyaBilgileri(10000);
+
+    // Wait for filetree to load with longer timeout
+    await waitForFiletree(30000);
 
     // Scan filetree
     const scannedEvraklar = scanFiletree();
     evraklar.value = scannedEvraklar;
+
+    // Detect pagination (warn if not all evraklar are visible)
+    const pagination = detectPagination();
+    paginationInfo.value = pagination;
+    if (pagination?.hasMultiplePages) {
+      console.warn(
+        `Pagination detected: page ${pagination.currentPage}/${pagination.totalPages}. ` +
+        `Only current page evraklar are scanned.`
+      );
+    }
 
     // Get dosya bilgileri
     const dosya = getDosyaBilgileri();
@@ -51,18 +93,18 @@ async function initExtension() {
     const kisiAdiValue = findKisiAdi();
     kisiAdi.value = kisiAdiValue;
 
-    console.log('Extension initialized:', {
+    console.log("Extension initialized:", {
       evrakCount: scannedEvraklar.length,
       dosyaNo: dosya?.dosyaNo,
-      kisiAdi: kisiAdiValue
+      kisiAdi: kisiAdiValue,
     });
 
     // Render Preact app
     renderApp();
-
-    isInitialized = true;
   } catch (error) {
-    console.error('Error initializing extension:', error);
+    console.log("Extension init skipped:", (error as Error).message);
+    // Reset flag to allow retry when actual dosya page is opened
+    isInitialized = false;
   }
 }
 
@@ -72,8 +114,8 @@ async function initExtension() {
 function renderApp() {
   if (!appContainer) {
     // Create container
-    appContainer = document.createElement('div');
-    appContainer.id = 'uyap-extension-root';
+    appContainer = document.createElement("div");
+    appContainer.id = "uyap-extension-root";
     document.body.appendChild(appContainer);
 
     // Render Preact app
@@ -95,9 +137,30 @@ function cleanupExtension() {
   evraklar.value = [];
   dosyaBilgileri.value = null;
   sessionExpired.value = false;
-  kisiAdi.value = '';
+  paginationInfo.value = null;
+  kisiAdi.value = "";
 
-  console.log('Extension cleaned up');
+  console.log("Extension cleaned up");
+}
+
+/**
+ * Check if the UYAP modal is actually visible and active
+ * The modal element exists as an empty shell in the DOM at all times,
+ * so we must check visibility, not just existence.
+ */
+function isModalVisible(): boolean {
+  const modal = document.querySelector<HTMLElement>(SELECTORS.MODAL);
+  if (!modal) return false;
+
+  // Check CSS display/visibility
+  const style = window.getComputedStyle(modal);
+  if (style.display === 'none' || style.visibility === 'hidden') return false;
+
+  // Check Bootstrap/jQuery modal classes
+  if (modal.classList.contains('show') || modal.classList.contains('in')) return true;
+
+  // Fallback: check if modal has actual dimensions (rendered on screen)
+  return modal.offsetWidth > 0 && modal.offsetHeight > 0;
 }
 
 /**
@@ -106,86 +169,70 @@ function cleanupExtension() {
  */
 function observeModal() {
   let debounceTimer: ReturnType<typeof setTimeout> | null = null;
+  let isProcessing = false;
 
   const observer = new MutationObserver(() => {
+    // Skip if already processing to prevent multiple simultaneous operations
+    if (isProcessing) return;
+
     if (debounceTimer) clearTimeout(debounceTimer);
 
     debounceTimer = setTimeout(() => {
-      const modal = document.querySelector(SELECTORS.MODAL);
+      // Double-check inside timeout
+      if (isProcessing) return;
 
-      if (modal && !isInitialized) {
-        console.log('UYAP modal detected');
-        initExtension();
-      } else if (!modal && isInitialized) {
-        console.log('UYAP modal closed');
+      const modalVisible = isModalVisible();
+
+      if (modalVisible && !isInitialized) {
+        console.log("UYAP modal detected and visible");
+        isProcessing = true;
+
+        initExtension()
+          .catch((err) => {
+            console.error("Init failed:", err);
+          })
+          .finally(() => {
+            isProcessing = false;
+          });
+      } else if (!modalVisible && isInitialized) {
+        console.log("UYAP modal closed");
+        isProcessing = true;
         cleanupExtension();
+        isProcessing = false;
       }
     }, 150);
   });
 
-  // Start observing
-  observer.observe(document.body, {
+  // Observe the modal element directly if it exists, otherwise body
+  const modalEl = document.querySelector(SELECTORS.MODAL);
+  const observeTarget = modalEl?.parentElement || document.body;
+
+  observer.observe(observeTarget, {
     childList: true,
-    subtree: true
+    subtree: true,
+    attributes: true,
+    attributeFilter: ['class', 'style']
   });
 
-  console.log('Started observing for UYAP modal');
+  console.log("Started observing for UYAP modal");
 
-  // Check if modal already exists
-  const existingModal = document.querySelector(SELECTORS.MODAL);
-  if (existingModal) {
-    console.log('UYAP modal already exists');
-    initExtension();
+  // Check if modal is already visible
+  if (isModalVisible()) {
+    console.log("UYAP modal already visible");
+    isProcessing = true;
+    initExtension()
+      .catch((err) => console.error("Init failed:", err))
+      .finally(() => {
+        isProcessing = false;
+      });
   }
 }
 
-/**
- * Listen for messages from background script
- */
-function setupMessageListener() {
-  onMessage((message, _sender) => {
-    console.log('Content script received message:', message.type);
-
-    switch (message.type) {
-      case 'SESSION_EXPIRED':
-        sessionExpired.value = true;
-        break;
-
-      case 'DOWNLOAD_PROGRESS': {
-        const progressPayload = message.payload as DownloadProgressPayload;
-
-        // Resolve the pending download promise in Downloader
-        resolveDownloadProgress(progressPayload);
-
-        // Update download state signals
-        const currentState = indirmeDurumu.value;
-        if (progressPayload.status === 'completed') {
-          updateDownloadProgress(
-            (currentState.completedCount || 0) + 1,
-            currentState.failedCount || 0
-          );
-        } else if (progressPayload.status === 'failed') {
-          updateDownloadProgress(
-            currentState.completedCount || 0,
-            (currentState.failedCount || 0) + 1
-          );
-        }
-        break;
-      }
-
-      default:
-        break;
-    }
-  });
-}
-
 // Initialize when DOM is ready
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', () => {
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", () => {
     observeModal();
-    setupMessageListener();
   });
 } else {
   observeModal();
-  setupMessageListener();
 }

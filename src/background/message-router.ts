@@ -1,14 +1,11 @@
-import type { Message } from '@/types';
+import type { Message, WriteFilePayload } from '@/types';
 import {
   saveDirectoryHandle,
   loadDirectoryHandle,
   verifyDirectoryPermission
 } from './idb-storage';
 import { STORAGE_KEYS } from '@lib';
-import {
-  queueDownloadMetadata,
-  cancelAllDownloads
-} from './download-interceptor';
+import { writeFileToDirectory } from './file-writer';
 
 /**
  * Handle messages from popup and content scripts
@@ -35,7 +32,7 @@ export function initMessageRouter(): void {
 
 async function handleMessage(
   message: Message,
-  sender: chrome.runtime.MessageSender
+  _sender: chrome.runtime.MessageSender
 ): Promise<any> {
   console.log('Background received message:', message.type);
 
@@ -52,11 +49,8 @@ async function handleMessage(
     case 'SET_SETTINGS':
       return await handleSetSettings(message.payload);
 
-    case 'DOWNLOAD_START':
-      return await handleDownloadStart(message.payload, sender);
-
-    case 'DOWNLOAD_CANCEL':
-      return handleDownloadCancel();
+    case 'WRITE_FILE':
+      return await writeFileToDirectory(message.payload as WriteFilePayload);
 
     default:
       console.warn('Unknown message type:', message.type);
@@ -121,38 +115,4 @@ async function handleSetSettings(settings: any): Promise<{ success: boolean }> {
       }
     );
   });
-}
-
-/**
- * Handle download start - queue metadata for download matching
- * Content script sends this BEFORE calling UYAP's downloadDoc()
- * so the background can match the upcoming Chrome download with evrak metadata
- */
-async function handleDownloadStart(
-  payload: { evrakId: string; evrakName: string; relativePath: string },
-  sender: chrome.runtime.MessageSender
-): Promise<{ success: boolean }> {
-  const tabId = sender.tab?.id;
-
-  if (!tabId) {
-    console.warn('DOWNLOAD_START received without tab ID');
-    return { success: false };
-  }
-
-  queueDownloadMetadata({
-    ...payload,
-    tabId
-  });
-
-  console.log(`Queued metadata for evrak: ${payload.evrakId} (tab: ${tabId})`);
-  return { success: true };
-}
-
-/**
- * Handle download cancel - clear all pending and active downloads
- */
-function handleDownloadCancel(): { success: boolean } {
-  cancelAllDownloads();
-  console.log('All pending downloads cancelled');
-  return { success: true };
 }

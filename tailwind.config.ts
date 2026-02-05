@@ -6,6 +6,9 @@ export default {
     './src/**/*.{js,ts,jsx,tsx}',
     './src/popup/index.html'
   ],
+  corePlugins: {
+    preflight: false,
+  },
   theme: {
     extend: {},
   },

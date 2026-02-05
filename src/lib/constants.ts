@@ -34,7 +34,8 @@ export const SELECTORS = {
   YARGI_TURU_SELECT: '#yargiTuru',
   USERNAME: '.username.username-hide-on-mobile',
   FILE_SPAN: 'span.file',
-  FOLDER_SPAN: 'span.folder'
+  FOLDER_SPAN: 'span.folder',
+  EVRAK_RESULT: '#dosya_evrak_bilgileri_result'
 } as const;
 
 // Folders to skip during scanning
@@ -62,6 +63,13 @@ export const STORAGE_KEYS = {
   SETTINGS: 'uyap-settings',
   DIRECTORY_HANDLE: 'directory-handle',
   LAST_EXPORT: 'last-export'
+} as const;
+
+// Retry configuration
+export const RETRY_CONFIG = {
+  MAX_RETRIES: 2,
+  BASE_DELAY: 1000,           // 1s initial retry delay
+  DELAY_MULTIPLIER: 2         // Exponential backoff: 1s, 2s
 } as const;
 
 // Export file name

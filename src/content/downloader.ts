@@ -2,38 +2,110 @@ import type {
   EvrakItem,
   DosyaBilgileri,
   DownloadProgress,
-  DownloadProgressPayload
+  WriteFileResponse
 } from '@/types';
 import { getYargiTuru } from './scanner';
 import { ayarlar, sessionExpired } from '@store';
-import { sendToBackground } from '@lib';
-
-// Registry of pending download promises (resolved by message handler in index.tsx)
-const pendingResolvers = new Map<string, (payload: DownloadProgressPayload) => void>();
+import {
+  sendToBackground,
+  UYAP_BASE_URL,
+  DOWNLOAD_ENDPOINT,
+  MAGIC_BYTES,
+  MIME_TYPES,
+  FILE_EXTENSIONS,
+  RETRY_CONFIG
+} from '@lib';
 
 /**
- * Resolve a pending download promise from external message handler
- * Called when background sends DOWNLOAD_PROGRESS to content script
+ * Match byte array with magic bytes signature
  */
-export function resolveDownloadProgress(payload: DownloadProgressPayload): void {
-  const resolver = pendingResolvers.get(payload.evrakId);
-  if (resolver) {
-    pendingResolvers.delete(payload.evrakId);
-    resolver(payload);
+function matchBytes(header: Uint8Array, magic: readonly number[]): boolean {
+  if (header.length < magic.length) return false;
+
+  for (let i = 0; i < magic.length; i++) {
+    if (header[i] !== magic[i]) return false;
   }
+
+  return true;
 }
 
 /**
- * Downloader class
- * CRITICAL: Calls UYAP's native downloadDoc() function
- * CRITICAL: Respects WAF protection with 300ms+ delay between downloads
- * CRITICAL: Never modifies UYAP DOM (jQuery events attached)
+ * Detect file type from magic bytes
+ * Returns MIME type and file extension
+ */
+function detectFileType(
+  bytes: Uint8Array
+): { mimeType: string; extension: string } {
+  const header = bytes.slice(0, 4);
+
+  if (matchBytes(header, MAGIC_BYTES.PDF)) {
+    return { mimeType: MIME_TYPES.PDF, extension: FILE_EXTENSIONS.PDF };
+  }
+
+  if (matchBytes(header, MAGIC_BYTES.ZIP)) {
+    return { mimeType: MIME_TYPES.UDF, extension: FILE_EXTENSIONS.UDF };
+  }
+
+  if (matchBytes(header, MAGIC_BYTES.TIFF_LE) || matchBytes(header, MAGIC_BYTES.TIFF_BE)) {
+    return { mimeType: MIME_TYPES.TIFF, extension: FILE_EXTENSIONS.TIFF };
+  }
+
+  return { mimeType: MIME_TYPES.UNKNOWN, extension: '' };
+}
+
+/**
+ * Check if response bytes indicate HTML content (session expired)
+ * UYAP returns HTTP 200 + HTML login page when session expires
+ */
+function isHtmlResponse(bytes: Uint8Array): boolean {
+  const snippet = new TextDecoder().decode(bytes.slice(0, 500));
+  return snippet.includes('<!DOCTYPE') ||
+    snippet.includes('<html') ||
+    snippet.includes('<HTML');
+}
+
+/**
+ * Convert ArrayBuffer to base64 string for Chrome messaging
+ */
+function arrayBufferToBase64(buffer: ArrayBuffer): string {
+  const bytes = new Uint8Array(buffer);
+  // Process in chunks to avoid call stack overflow on large files
+  const CHUNK_SIZE = 8192;
+  let binary = '';
+
+  for (let i = 0; i < bytes.byteLength; i += CHUNK_SIZE) {
+    const chunk = bytes.subarray(i, Math.min(i + CHUNK_SIZE, bytes.byteLength));
+    binary += String.fromCharCode(...chunk);
+  }
+
+  return btoa(binary);
+}
+
+interface SingleDownloadResult {
+  success: boolean;
+  sessionExpired?: boolean;
+  fileName?: string;
+  mimeType?: string;
+  fileSize?: number;
+  error?: string;
+}
+
+/**
+ * Downloader class - fetches files directly from UYAP and writes via background
+ *
+ * FLOW:
+ * 1. Content script fetches download URL directly (same-origin, credentials included)
+ * 2. Checks Content-Type header + magic bytes for session expired detection
+ * 3. Converts ArrayBuffer to base64 and sends to background via WRITE_FILE message
+ * 4. Background writes file to user-selected directory via File System Access API
+ *
+ * This approach eliminates the need for file:// protocol access in service workers,
+ * which is blocked in Chrome MV3.
  */
 export class Downloader {
   private abortController: AbortController | null = null;
   private isPaused = false;
   private currentIndex = 0;
-  private static readonly DOWNLOAD_TIMEOUT = 30000; // 30 seconds
 
   constructor(
     private onProgress: (progress: DownloadProgress) => void,
@@ -78,19 +150,19 @@ export class Downloader {
         status: 'downloading'
       });
 
-      // Download the evrak and wait for completion
-      const result = await this.downloadSingleAndWait(evrak, dosya);
+      // Download and write the evrak (with retry support)
+      const result = await this.downloadWithRetry(evrak, dosya);
 
-      if (result.status === 'session_expired') {
-        console.log('Session expired during download');
+      if (result.sessionExpired) {
+        sessionExpired.value = true;
         this.onSessionExpired();
         break;
       }
 
-      // Notify with actual result
+      // Notify with result
       this.onProgress({
         evrakId: evrak.evrakId,
-        status: result.status === 'completed' ? 'completed' : 'failed',
+        status: result.success ? 'completed' : 'failed',
         error: result.error
       });
 
@@ -100,146 +172,159 @@ export class Downloader {
   }
 
   /**
-   * Download a single evrak and wait for completion via background script
-   * Flow: Send metadata -> Trigger UYAP download -> Wait for background response
+   * Download with automatic retry on transient failures
+   * Does NOT retry on session expiry or user cancellation
    */
-  private async downloadSingleAndWait(
+  private async downloadWithRetry(
     evrak: EvrakItem,
     dosya: DosyaBilgileri
-  ): Promise<DownloadProgressPayload> {
-    try {
-      // Step 1: Send metadata to background for download matching
-      await sendToBackground('DOWNLOAD_START', {
-        evrakId: evrak.evrakId,
-        evrakName: evrak.name,
-        relativePath: evrak.relativePath
-      });
+  ): Promise<SingleDownloadResult> {
+    const maxAttempts = ayarlar.value.autoRetry
+      ? RETRY_CONFIG.MAX_RETRIES + 1
+      : 1;
 
-      // Step 2: Create a promise that resolves when background sends DOWNLOAD_PROGRESS
-      const resultPromise = new Promise<DownloadProgressPayload>((resolve) => {
-        pendingResolvers.set(evrak.evrakId, resolve);
+    let lastResult: SingleDownloadResult = { success: false, error: 'Bilinmeyen hata' };
 
-        // Timeout safety: resolve with failure if no response
-        setTimeout(() => {
-          if (pendingResolvers.has(evrak.evrakId)) {
-            pendingResolvers.delete(evrak.evrakId);
-            resolve({
-              evrakId: evrak.evrakId,
-              status: 'failed',
-              error: 'Download timeout'
-            });
-          }
-        }, Downloader.DOWNLOAD_TIMEOUT);
-      });
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      lastResult = await this.downloadSingle(evrak, dosya);
 
-      // Step 3: Trigger UYAP's native download
-      const initiated = this.triggerDownload(evrak, dosya);
-
-      if (!initiated) {
-        pendingResolvers.delete(evrak.evrakId);
-        return {
-          evrakId: evrak.evrakId,
-          status: 'failed',
-          error: 'UYAP downloadDoc function not found'
-        };
+      // Don't retry on success, session expiry, or user cancellation
+      if (
+        lastResult.success ||
+        lastResult.sessionExpired ||
+        lastResult.error === 'Iptal edildi' ||
+        this.abortController?.signal.aborted
+      ) {
+        return lastResult;
       }
 
-      // Step 4: Wait for background to process and respond
-      return await resultPromise;
-    } catch (error) {
-      console.error('Error downloading evrak:', error);
-      pendingResolvers.delete(evrak.evrakId);
+      // If more attempts remaining, wait with exponential backoff
+      if (attempt < maxAttempts) {
+        const delay = RETRY_CONFIG.BASE_DELAY *
+          Math.pow(RETRY_CONFIG.DELAY_MULTIPLIER, attempt - 1);
+        console.log(
+          `Retry ${attempt}/${RETRY_CONFIG.MAX_RETRIES} for ${evrak.evrakId} after ${delay}ms`
+        );
+        await this.sleep(delay);
+      }
+    }
+
+    return lastResult;
+  }
+
+  /**
+   * Download a single evrak via fetch() and write to target directory
+   *
+   * Steps:
+   * 1. Fetch from UYAP (same-origin, with credentials)
+   * 2. Check Content-Type header for quick session detection
+   * 3. Read body as ArrayBuffer, check magic bytes
+   * 4. Detect file type and build filename
+   * 5. Send base64 data to background for writing
+   */
+  private async downloadSingle(
+    evrak: EvrakItem,
+    dosya: DosyaBilgileri
+  ): Promise<SingleDownloadResult> {
+    const yargiTuru = getYargiTuru();
+    const url = `${UYAP_BASE_URL}/${DOWNLOAD_ENDPOINT}` +
+      `?evrakId=${evrak.evrakId}` +
+      `&dosyaId=${dosya.dosyaId}` +
+      `&yargiTuru=${yargiTuru}`;
+
+    try {
+      // Step 1: Fetch from UYAP
+      const response = await fetch(url, {
+        credentials: 'include',
+        signal: this.abortController?.signal
+      });
+
+      if (!response.ok) {
+        return { success: false, error: `HTTP ${response.status}` };
+      }
+
+      // Step 2: Quick session detection via Content-Type
+      const contentType = response.headers.get('content-type') || '';
+
+      if (contentType.includes('text/html')) {
+        return { success: false, sessionExpired: true };
+      }
+
+      // Step 3: Read body and check magic bytes
+      const arrayBuffer = await response.arrayBuffer();
+      const bytes = new Uint8Array(arrayBuffer);
+
+      // Double-check with magic bytes (UYAP may not set Content-Type correctly)
+      if (isHtmlResponse(bytes)) {
+        return { success: false, sessionExpired: true };
+      }
+
+      // Step 4: Detect file type and build filename
+      const { mimeType, extension } = detectFileType(bytes);
+      const fileName = `${evrak.name}${extension || '.bin'}`;
+
+      // Step 5: Send to background for writing
+      const base64Data = arrayBufferToBase64(arrayBuffer);
+
+      const writeResult = await sendToBackground<WriteFileResponse>('WRITE_FILE', {
+        base64Data,
+        fileName,
+        relativePath: evrak.relativePath,
+        mimeType,
+        fileSize: arrayBuffer.byteLength
+      });
+
+      if (!writeResult.success) {
+        return { success: false, error: writeResult.error };
+      }
+
       return {
-        evrakId: evrak.evrakId,
-        status: 'failed',
-        error: error instanceof Error ? error.message : 'Unknown error'
+        success: true,
+        fileName,
+        mimeType,
+        fileSize: arrayBuffer.byteLength
+      };
+    } catch (error) {
+      if (error instanceof DOMException && error.name === 'AbortError') {
+        return { success: false, error: 'Iptal edildi' };
+      }
+
+      console.error('Download error:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Bilinmeyen hata'
       };
     }
   }
 
-  /**
-   * Trigger UYAP's native download function
-   * CRITICAL: Only calls downloadDoc, does NOT wait for completion
-   * CRITICAL: Never modifies UYAP DOM (jQuery events attached)
-   */
-  private triggerDownload(
-    evrak: EvrakItem,
-    dosya: DosyaBilgileri
-  ): boolean {
-    try {
-      const downloadDoc = (window as any).downloadDoc;
-
-      if (typeof downloadDoc !== 'function') {
-        console.error('UYAP downloadDoc function not found');
-        return false;
-      }
-
-      const yargiTuru = getYargiTuru();
-      downloadDoc(evrak.evrakId, dosya.dosyaId, yargiTuru);
-      console.log(`Download triggered for evrak: ${evrak.evrakId}`);
-      return true;
-    } catch (error) {
-      console.error('Error triggering download:', error);
-      return false;
-    }
-  }
-
-  /**
-   * Pause downloads
-   */
   pause(): void {
     this.isPaused = true;
     console.log('Downloads paused');
   }
 
-  /**
-   * Resume downloads
-   */
   resume(): void {
     this.isPaused = false;
     console.log('Downloads resumed');
   }
 
-  /**
-   * Cancel all downloads
-   */
   cancel(): void {
     this.abortController?.abort();
     this.isPaused = false;
-
-    // Clear all pending resolvers
-    pendingResolvers.clear();
-
-    // Notify background to cancel pending downloads
-    sendToBackground('DOWNLOAD_CANCEL').catch(console.error);
-
     console.log('Downloads cancelled');
   }
 
-  /**
-   * Get current download index
-   */
   getCurrentIndex(): number {
     return this.currentIndex;
   }
 
-  /**
-   * Check if downloads are paused
-   */
   isPausedState(): boolean {
     return this.isPaused;
   }
 
-  /**
-   * Check if downloads are cancelled
-   */
   isCancelled(): boolean {
     return this.abortController?.signal.aborted || false;
   }
 
-  /**
-   * Sleep utility
-   */
   private sleep(ms: number): Promise<void> {
     return new Promise(resolve => setTimeout(resolve, ms));
   }

@@ -1,13 +1,9 @@
 import { initMessageRouter } from './message-router';
-import { initDownloadInterceptor } from './download-interceptor';
 
 console.log('UYAP Extension: Background service worker started');
 
-// Initialize message router
+// Initialize message router (handles all content/popup communication)
 initMessageRouter();
-
-// Initialize download interceptor
-initDownloadInterceptor();
 
 // Handle extension installation
 chrome.runtime.onInstalled.addListener((details) => {
@@ -17,4 +13,3 @@ chrome.runtime.onInstalled.addListener((details) => {
     console.log('UYAP Extension updated');
   }
 });
-

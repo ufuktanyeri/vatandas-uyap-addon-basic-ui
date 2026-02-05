@@ -1,4 +1,4 @@
-import type { EvrakItem, DosyaBilgileri } from '@/types';
+import type { EvrakItem, DosyaBilgileri, PaginationInfo } from '@/types';
 import {
   SELECTORS,
   SKIP_FOLDERS,
@@ -73,6 +73,9 @@ export function getDosyaBilgileri(): DosyaBilgileri | null {
 /**
  * Parse tooltip content to extract metadata
  * UYAP stores evrak metadata in data-original-title attribute
+ * Format: HTML with <br> separators, e.g.:
+ *   "Birim Evrak No: 12345<br>Onay Tarihi: 15.01.2024<br>..."
+ * Also handles plain newlines (\n) as fallback
  */
 function parseTooltip(tooltip: string | null): Record<string, string> {
   const result: Record<string, string> = {};
@@ -81,18 +84,21 @@ function parseTooltip(tooltip: string | null): Record<string, string> {
     return result;
   }
 
-  // Split by newlines and parse key-value pairs
-  const lines = tooltip.split('\n');
+  // Split by <br>, <br/>, <br /> tags AND newlines
+  const lines = tooltip.split(/<br\s*\/?>|\n/gi);
 
   for (const line of lines) {
-    const colonIndex = line.indexOf(':');
+    // Strip any remaining HTML tags from the line
+    const clean = line.replace(/<[^>]*>/g, '').trim();
+
+    const colonIndex = clean.indexOf(':');
 
     if (colonIndex === -1) {
       continue;
     }
 
-    const key = line.substring(0, colonIndex).trim();
-    const value = line.substring(colonIndex + 1).trim();
+    const key = clean.substring(0, colonIndex).trim();
+    const value = clean.substring(colonIndex + 1).trim();
 
     if (key && value) {
       result[key] = value;
@@ -189,30 +195,62 @@ export function scanFiletree(): EvrakItem[] {
 }
 
 /**
- * Wait for filetree to be loaded in the DOM
+ * Detect if the UYAP filetree has pagination
+ * UYAP shows "Toplam X sayfadan Y. sayfa" when there are multiple pages
+ * This means not all evraklar are visible in the current DOM
  */
-export function waitForFiletree(
-  timeout: number = 10000
-): Promise<HTMLUListElement> {
+export function detectPagination(): PaginationInfo | null {
+  const resultContainer = document.querySelector(SELECTORS.EVRAK_RESULT);
+  if (!resultContainer) return null;
+
+  // Look for pagination text: "Toplam X sayfadan Y. sayfa"
+  const text = resultContainer.textContent || '';
+  const match = text.match(/Toplam\s+(\d+)\s+sayfadan\s+(\d+)\.\s*sayfa/i);
+
+  if (!match) return null;
+
+  const totalPages = parseInt(match[1], 10);
+  const currentPage = parseInt(match[2], 10);
+
+  return {
+    currentPage,
+    totalPages,
+    hasMultiplePages: totalPages > 1
+  };
+}
+
+/**
+ * Wait for filetree to load in the DOM
+ * @param timeout - Maximum time to wait in milliseconds (default: 30000ms = 30s)
+ * @returns Promise that resolves with the filetree element
+ */
+export function waitForFiletree(timeout = 30000): Promise<Element> {
   return new Promise((resolve, reject) => {
     const startTime = Date.now();
 
     const check = () => {
-      const filetree = document.querySelector<HTMLUListElement>(
-        SELECTORS.FILETREE
-      );
+      const filetree = document.querySelector(SELECTORS.FILETREE);
 
       if (filetree) {
-        resolve(filetree);
-        return;
+        // Filetree found, but check if it has content
+        const hasContent = filetree.querySelector('li');
+        if (hasContent) {
+          console.log('Filetree loaded with content');
+          resolve(filetree);
+          return;
+        } else {
+          console.log('Filetree found but empty, waiting for content...');
+        }
       }
 
+      // Check timeout
       if (Date.now() - startTime > timeout) {
         reject(new Error('Filetree load timeout'));
         return;
       }
 
-      setTimeout(check, 100);
+      // Check again after 500ms
+      setTimeout(check, 500);
     };
 
     check();

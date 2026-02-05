@@ -18,6 +18,13 @@ export interface DosyaBilgileri {
   dosyaDurumu: string;
 }
 
+// Pagination bilgisi (UYAP filetree sayfalama)
+export interface PaginationInfo {
+  currentPage: number;
+  totalPages: number;
+  hasMultiplePages: boolean;
+}
+
 // İndirme durumu
 export type DownloadStatus =
   | 'pending'
@@ -93,6 +100,21 @@ export interface ExportData {
   }>;
 }
 
+// Write file payload (content -> background)
+export interface WriteFilePayload {
+  base64Data: string;
+  fileName: string;
+  relativePath: string;
+  mimeType: string;
+  fileSize: number;
+}
+
+// Write file response (background -> content)
+export interface WriteFileResponse {
+  success: boolean;
+  error?: string;
+}
+
 // Message types for communication between content, popup, and background
 export type MessageType =
   | 'SCAN_COMPLETE'
@@ -106,7 +128,8 @@ export type MessageType =
   | 'GET_DIRECTORY_HANDLE'
   | 'SET_DIRECTORY_HANDLE'
   | 'GET_SETTINGS'
-  | 'SET_SETTINGS';
+  | 'SET_SETTINGS'
+  | 'WRITE_FILE';
 
 export interface Message<T = any> {
   type: MessageType;

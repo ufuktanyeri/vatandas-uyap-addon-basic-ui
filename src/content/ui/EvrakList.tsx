@@ -1,16 +1,13 @@
 import { grupluEvraklar, deltaInfo } from '@shared/signals';
 import { EvrakGroup } from './EvrakGroup';
+import { EmptyState } from '@components/EmptyState';
 
 export function EvrakList() {
   const groups = grupluEvraklar.value;
   const delta = deltaInfo.value;
 
   if (groups.size === 0) {
-    return (
-      <div class="uyap-p-4 uyap-text-center uyap-text-gray-500">
-        <p>Evrak bulunamadı</p>
-      </div>
-    );
+    return <EmptyState message="Evrak bulunamadı" />;
   }
 
   return (

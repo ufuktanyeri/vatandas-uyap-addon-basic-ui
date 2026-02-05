@@ -2,23 +2,14 @@ import { useState, useEffect } from 'preact/hooks';
 import { sendToBackground } from '@shared/messages';
 import type { Settings } from '@shared/types';
 import { DEFAULT_SETTINGS } from '@shared/constants';
+import { Button, useToast } from '@components/index';
 
 export function Popup() {
   const [directorySelected, setDirectorySelected] = useState(false);
   const [directoryName, setDirectoryName] = useState('');
   const [settings, setSettings] = useState<Settings>({ ...DEFAULT_SETTINGS });
   const [loading, setLoading] = useState(true);
-  const [notification, setNotification] = useState<{
-    message: string;
-    type: 'error' | 'success';
-  } | null>(null);
-
-  useEffect(() => {
-    if (notification) {
-      const timer = setTimeout(() => setNotification(null), 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [notification]);
+  const { showToast, Toast } = useToast();
 
   useEffect(() => {
     // Load directory handle status and settings
@@ -65,7 +56,7 @@ export function Popup() {
     } catch (error) {
       if (error instanceof Error && error.name !== 'AbortError') {
         console.error('Error selecting directory:', error);
-        setNotification({ message: 'Klasor secimi basarisiz oldu', type: 'error' });
+        showToast('Klasor secimi basarisiz oldu', 'error');
       }
     }
   };
@@ -73,10 +64,10 @@ export function Popup() {
   const handleSaveSettings = async () => {
     try {
       await sendToBackground('SET_SETTINGS', settings);
-      setNotification({ message: 'Ayarlar kaydedildi', type: 'success' });
+      showToast('Ayarlar kaydedildi', 'success');
     } catch (error) {
       console.error('Error saving settings:', error);
-      setNotification({ message: 'Ayarlar kaydedilemedi', type: 'error' });
+      showToast('Ayarlar kaydedilemedi', 'error');
     }
   };
 
@@ -99,18 +90,8 @@ export function Popup() {
         </p>
       </div>
 
-      {/* Inline notification */}
-      {notification && (
-        <div
-          class={`uyap-px-4 uyap-py-2 uyap-text-sm ${
-            notification.type === 'error'
-              ? 'uyap-bg-red-50 uyap-text-red-800'
-              : 'uyap-bg-green-50 uyap-text-green-800'
-          }`}
-        >
-          {notification.message}
-        </div>
-      )}
+      {/* Toast notification */}
+      <Toast />
 
       <div class="uyap-p-4 uyap-space-y-4">
         {/* Directory selection */}
@@ -143,12 +124,13 @@ export function Popup() {
                 </div>
               </div>
 
-              <button
+              <Button
+                variant="secondary"
                 onClick={handleSelectDirectory}
-                class="uyap-w-full uyap-px-4 uyap-py-2 uyap-text-sm uyap-font-medium uyap-text-gray-700 uyap-bg-white uyap-border uyap-border-gray-300 uyap-rounded-md hover:uyap-bg-gray-50"
+                fullWidth
               >
                 Klasörü Değiştir
-              </button>
+              </Button>
             </div>
           ) : (
             <div class="uyap-space-y-3">
@@ -158,12 +140,13 @@ export function Popup() {
                 </p>
               </div>
 
-              <button
+              <Button
+                variant="primary"
                 onClick={handleSelectDirectory}
-                class="uyap-w-full uyap-px-4 uyap-py-2 uyap-text-sm uyap-font-medium uyap-text-white uyap-bg-blue-600 uyap-border uyap-border-transparent uyap-rounded-md hover:uyap-bg-blue-700"
+                fullWidth
               >
                 Klasör Seç
-              </button>
+              </Button>
             </div>
           )}
         </div>
@@ -253,12 +236,13 @@ export function Popup() {
             </div>
 
             {/* Save button */}
-            <button
+            <Button
+              variant="primary"
               onClick={handleSaveSettings}
-              class="uyap-w-full uyap-px-4 uyap-py-2 uyap-text-sm uyap-font-medium uyap-text-white uyap-bg-blue-600 uyap-border uyap-border-transparent uyap-rounded-md hover:uyap-bg-blue-700"
+              fullWidth
             >
               Ayarları Kaydet
-            </button>
+            </Button>
           </div>
         </div>
 

@@ -15,7 +15,8 @@ export default defineConfig({
       '@shared': '/src/shared',
       '@content': '/src/content',
       '@popup': '/src/popup',
-      '@background': '/src/background'
+      '@background': '/src/background',
+      '@components': '/src/components'
     }
   },
   build: {

@@ -1,4 +1,5 @@
 import { sessionExpired } from '@shared/signals';
+import { Button } from '@components/Button';
 
 interface SessionAlertProps {
   onClose: () => void;
@@ -36,12 +37,13 @@ export function SessionAlert({ onClose }: SessionAlertProps) {
             </p>
           </div>
           <div class="uyap-mt-3">
-            <button
+            <Button
+              variant="danger"
+              size="sm"
               onClick={() => window.location.reload()}
-              class="uyap-inline-flex uyap-items-center uyap-px-3 uyap-py-2 uyap-border uyap-border-transparent uyap-text-sm uyap-leading-4 uyap-font-medium uyap-rounded-md uyap-text-red-700 uyap-bg-red-100 hover:uyap-bg-red-200 focus:uyap-outline-none focus:uyap-ring-2 focus:uyap-ring-offset-2 focus:uyap-ring-red-500"
             >
               Sayfayı Yenile
-            </button>
+            </Button>
           </div>
         </div>
         <div class="uyap-ml-auto uyap-pl-3">

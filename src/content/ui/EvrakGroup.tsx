@@ -6,6 +6,7 @@ import {
   klasorEvraklariniSec,
   klasorEvraklariniKaldir
 } from '@shared/signals';
+import { EvrakCard } from './EvrakCard';
 
 interface EvrakGroupProps {
   klasorAdi: string;
@@ -84,32 +85,12 @@ export function EvrakGroup({ klasorAdi, evraklar }: EvrakGroupProps) {
       {!collapsed && (
         <div class="uyap-divide-y uyap-divide-gray-100">
           {evraklar.map(evrak => (
-            <div
+            <EvrakCard
               key={evrak.evrakId}
-              class="uyap-flex uyap-items-start uyap-p-3 uyap-pl-10 hover:uyap-bg-gray-50"
-            >
-              <input
-                type="checkbox"
-                checked={seciliEvrakIds.value.has(evrak.evrakId)}
-                onChange={() => toggleEvrakSecimi(evrak.evrakId)}
-                class="uyap-mt-0.5 uyap-mr-3 uyap-h-4 uyap-w-4 uyap-text-blue-600 uyap-rounded"
-              />
-
-              <div class="uyap-flex-1 uyap-min-w-0">
-                <p class="uyap-text-sm uyap-text-gray-900 uyap-truncate">
-                  {evrak.name}
-                </p>
-
-                {(evrak.evrakTuru || evrak.evrakTarihi) && (
-                  <div class="uyap-mt-1 uyap-text-xs uyap-text-gray-500">
-                    {evrak.evrakTuru && (
-                      <span class="uyap-mr-3">{evrak.evrakTuru}</span>
-                    )}
-                    {evrak.evrakTarihi && <span>{evrak.evrakTarihi}</span>}
-                  </div>
-                )}
-              </div>
-            </div>
+              evrak={evrak}
+              selected={seciliEvrakIds.value.has(evrak.evrakId)}
+              onToggle={() => toggleEvrakSecimi(evrak.evrakId)}
+            />
           ))}
         </div>
       )}

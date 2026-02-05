@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'preact/hooks';
+import { useState } from 'preact/hooks';
 import {
   evraklar,
   seciliEvrakIds,
@@ -13,23 +13,14 @@ import { Downloader } from '../downloader';
 import { EvrakList } from './EvrakList';
 import { ProgressBar } from './ProgressBar';
 import { SessionAlert } from './SessionAlert';
+import { Button, useToast } from '@components/index';
 
 interface SidebarProps {
   onClose: () => void;
 }
 
 export function Sidebar({ onClose }: SidebarProps) {
-  const [notification, setNotification] = useState<{
-    message: string;
-    type: 'error' | 'success';
-  } | null>(null);
-
-  useEffect(() => {
-    if (notification) {
-      const timer = setTimeout(() => setNotification(null), 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [notification]);
+  const { showToast, Toast } = useToast();
 
   const [downloader] = useState(() => new Downloader(
     (progress) => {
@@ -55,14 +46,14 @@ export function Sidebar({ onClose }: SidebarProps) {
     );
 
     if (seciliEvraklar.length === 0) {
-      setNotification({ message: 'En az bir evrak secin', type: 'error' });
+      showToast('En az bir evrak secin', 'error');
       return;
     }
 
     const dosya = dosyaBilgileri.value;
 
     if (!dosya) {
-      setNotification({ message: 'Dosya bilgileri bulunamadi', type: 'error' });
+      showToast('Dosya bilgileri bulunamadi', 'error');
       return;
     }
 
@@ -138,18 +129,8 @@ export function Sidebar({ onClose }: SidebarProps) {
         </button>
       </div>
 
-      {/* Inline notification */}
-      {notification && (
-        <div
-          class={`uyap-px-4 uyap-py-2 uyap-text-sm ${
-            notification.type === 'error'
-              ? 'uyap-bg-red-50 uyap-text-red-800'
-              : 'uyap-bg-green-50 uyap-text-green-800'
-          }`}
-        >
-          {notification.message}
-        </div>
-      )}
+      {/* Toast notification */}
+      <Toast />
 
       {/* Session alert */}
       <SessionAlert onClose={() => { sessionExpired.value = false; }} />
@@ -169,44 +150,49 @@ export function Sidebar({ onClose }: SidebarProps) {
       {/* Actions */}
       <div class="uyap-p-4 uyap-border-b uyap-border-gray-200 uyap-space-y-2">
         <div class="uyap-flex uyap-gap-2">
-          <button
+          <Button
+            variant="secondary"
             onClick={handleTumunuSec}
             disabled={isDownloading}
-            class="uyap-flex-1 uyap-px-3 uyap-py-2 uyap-text-sm uyap-font-medium uyap-text-gray-700 uyap-bg-white uyap-border uyap-border-gray-300 uyap-rounded-md hover:uyap-bg-gray-50 disabled:uyap-opacity-50 disabled:uyap-cursor-not-allowed"
+            class="uyap-flex-1"
           >
             Tümünü Seç
-          </button>
-          <button
+          </Button>
+          <Button
+            variant="secondary"
             onClick={handleSecimiTemizle}
             disabled={isDownloading}
-            class="uyap-flex-1 uyap-px-3 uyap-py-2 uyap-text-sm uyap-font-medium uyap-text-gray-700 uyap-bg-white uyap-border uyap-border-gray-300 uyap-rounded-md hover:uyap-bg-gray-50 disabled:uyap-opacity-50 disabled:uyap-cursor-not-allowed"
+            class="uyap-flex-1"
           >
             Temizle
-          </button>
+          </Button>
         </div>
 
         {!isDownloading ? (
-          <button
+          <Button
+            variant="primary"
             onClick={handleIndir}
             disabled={seciliEvrakSayisi.value === 0}
-            class="uyap-w-full uyap-px-4 uyap-py-2 uyap-text-sm uyap-font-medium uyap-text-white uyap-bg-blue-600 uyap-border uyap-border-transparent uyap-rounded-md hover:uyap-bg-blue-700 disabled:uyap-opacity-50 disabled:uyap-cursor-not-allowed"
+            fullWidth
           >
             İndir ({seciliEvrakSayisi.value})
-          </button>
+          </Button>
         ) : (
           <div class="uyap-flex uyap-gap-2">
-            <button
+            <Button
+              variant="warning"
               onClick={handleDuraklat}
-              class="uyap-flex-1 uyap-px-4 uyap-py-2 uyap-text-sm uyap-font-medium uyap-text-white uyap-bg-yellow-600 uyap-border uyap-border-transparent uyap-rounded-md hover:uyap-bg-yellow-700"
+              class="uyap-flex-1"
             >
               {downloader.isPausedState() ? 'Devam Et' : 'Duraklat'}
-            </button>
-            <button
+            </Button>
+            <Button
+              variant="danger"
               onClick={handleIptal}
-              class="uyap-flex-1 uyap-px-4 uyap-py-2 uyap-text-sm uyap-font-medium uyap-text-white uyap-bg-red-600 uyap-border uyap-border-transparent uyap-rounded-md hover:uyap-bg-red-700"
+              class="uyap-flex-1"
             >
               İptal
-            </button>
+            </Button>
           </div>
         )}
       </div>

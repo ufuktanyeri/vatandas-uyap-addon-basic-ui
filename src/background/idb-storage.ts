@@ -88,15 +88,14 @@ export async function verifyDirectoryPermission(
   handle: FileSystemDirectoryHandle
 ): Promise<boolean> {
   try {
-    // Type assertion for File System Access API methods not in TypeScript types
-    const permission = await (handle as any).queryPermission({ mode: 'readwrite' });
+    const permission = await handle.queryPermission({ mode: 'readwrite' });
 
     if (permission === 'granted') {
       return true;
     }
 
     // Try to request permission
-    const requestResult = await (handle as any).requestPermission({ mode: 'readwrite' });
+    const requestResult = await handle.requestPermission({ mode: 'readwrite' });
     return requestResult === 'granted';
   } catch (error) {
     console.error('Error verifying directory permission:', error);

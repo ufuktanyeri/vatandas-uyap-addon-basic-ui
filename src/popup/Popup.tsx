@@ -8,6 +8,17 @@ export function Popup() {
   const [directoryName, setDirectoryName] = useState('');
   const [settings, setSettings] = useState<Settings>({ ...DEFAULT_SETTINGS });
   const [loading, setLoading] = useState(true);
+  const [notification, setNotification] = useState<{
+    message: string;
+    type: 'error' | 'success';
+  } | null>(null);
+
+  useEffect(() => {
+    if (notification) {
+      const timer = setTimeout(() => setNotification(null), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [notification]);
 
   useEffect(() => {
     // Load directory handle status and settings
@@ -54,7 +65,7 @@ export function Popup() {
     } catch (error) {
       if (error instanceof Error && error.name !== 'AbortError') {
         console.error('Error selecting directory:', error);
-        alert('Klasör seçimi başarısız oldu');
+        setNotification({ message: 'Klasor secimi basarisiz oldu', type: 'error' });
       }
     }
   };
@@ -62,10 +73,10 @@ export function Popup() {
   const handleSaveSettings = async () => {
     try {
       await sendToBackground('SET_SETTINGS', settings);
-      alert('Ayarlar kaydedildi');
+      setNotification({ message: 'Ayarlar kaydedildi', type: 'success' });
     } catch (error) {
       console.error('Error saving settings:', error);
-      alert('Ayarlar kaydedilemedi');
+      setNotification({ message: 'Ayarlar kaydedilemedi', type: 'error' });
     }
   };
 
@@ -87,6 +98,19 @@ export function Popup() {
           Dava dosyalarınızı kolayca indirin
         </p>
       </div>
+
+      {/* Inline notification */}
+      {notification && (
+        <div
+          class={`uyap-px-4 uyap-py-2 uyap-text-sm ${
+            notification.type === 'error'
+              ? 'uyap-bg-red-50 uyap-text-red-800'
+              : 'uyap-bg-green-50 uyap-text-green-800'
+          }`}
+        >
+          {notification.message}
+        </div>
+      )}
 
       <div class="uyap-p-4 uyap-space-y-4">
         {/* Directory selection */}

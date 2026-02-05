@@ -1,4 +1,4 @@
-import { useState } from 'preact/hooks';
+import { useState, useEffect } from 'preact/hooks';
 import {
   evraklar,
   seciliEvrakIds,
@@ -19,6 +19,18 @@ interface SidebarProps {
 }
 
 export function Sidebar({ onClose }: SidebarProps) {
+  const [notification, setNotification] = useState<{
+    message: string;
+    type: 'error' | 'success';
+  } | null>(null);
+
+  useEffect(() => {
+    if (notification) {
+      const timer = setTimeout(() => setNotification(null), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [notification]);
+
   const [downloader] = useState(() => new Downloader(
     (progress) => {
       console.log('Download progress:', progress);
@@ -43,14 +55,14 @@ export function Sidebar({ onClose }: SidebarProps) {
     );
 
     if (seciliEvraklar.length === 0) {
-      alert('Lütfen en az bir evrak seçin');
+      setNotification({ message: 'En az bir evrak secin', type: 'error' });
       return;
     }
 
     const dosya = dosyaBilgileri.value;
 
     if (!dosya) {
-      alert('Dosya bilgileri bulunamadı');
+      setNotification({ message: 'Dosya bilgileri bulunamadi', type: 'error' });
       return;
     }
 
@@ -125,6 +137,19 @@ export function Sidebar({ onClose }: SidebarProps) {
           </svg>
         </button>
       </div>
+
+      {/* Inline notification */}
+      {notification && (
+        <div
+          class={`uyap-px-4 uyap-py-2 uyap-text-sm ${
+            notification.type === 'error'
+              ? 'uyap-bg-red-50 uyap-text-red-800'
+              : 'uyap-bg-green-50 uyap-text-green-800'
+          }`}
+        >
+          {notification.message}
+        </div>
+      )}
 
       {/* Session alert */}
       <SessionAlert onClose={() => { sessionExpired.value = false; }} />

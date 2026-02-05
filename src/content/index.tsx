@@ -12,7 +12,8 @@ import {
   dosyaBilgileri,
   sessionExpired,
   indirmeDurumu,
-  updateDownloadProgress
+  updateDownloadProgress,
+  kisiAdi
 } from '@shared/signals';
 import type { DownloadProgressPayload } from '@shared/types';
 import { resolveDownloadProgress } from './downloader';
@@ -48,13 +49,14 @@ async function initExtension() {
     const dosya = getDosyaBilgileri();
     dosyaBilgileri.value = dosya;
 
-    // Get kisi adi
-    const kisiAdi = findKisiAdi();
+    // Get kisi adi and store in signal (used by export manifest)
+    const kisiAdiValue = findKisiAdi();
+    kisiAdi.value = kisiAdiValue;
 
     console.log('Extension initialized:', {
       evrakCount: scannedEvraklar.length,
       dosyaNo: dosya?.dosyaNo,
-      kisiAdi
+      kisiAdi: kisiAdiValue
     });
 
     // Show sidebar
@@ -99,31 +101,32 @@ function cleanupExtension() {
   evraklar.value = [];
   dosyaBilgileri.value = null;
   sessionExpired.value = false;
+  kisiAdi.value = '';
 
   console.log('Extension cleaned up');
 }
 
 /**
  * Observe UYAP DOM for modal appearance
+ * Uses debounce to prevent excessive callback firing on every DOM mutation
  */
 function observeModal() {
-  const observer = new MutationObserver((mutations) => {
-    for (const mutation of mutations) {
-      if (mutation.type === 'childList') {
-        // Check if modal appeared
-        const modal = document.querySelector(SELECTORS.MODAL);
+  let debounceTimer: ReturnType<typeof setTimeout> | null = null;
 
-        if (modal && !isInitialized) {
-          // Modal opened
-          console.log('UYAP modal detected');
-          initExtension();
-        } else if (!modal && isInitialized) {
-          // Modal closed
-          console.log('UYAP modal closed');
-          cleanupExtension();
-        }
+  const observer = new MutationObserver(() => {
+    if (debounceTimer) clearTimeout(debounceTimer);
+
+    debounceTimer = setTimeout(() => {
+      const modal = document.querySelector(SELECTORS.MODAL);
+
+      if (modal && !isInitialized) {
+        console.log('UYAP modal detected');
+        initExtension();
+      } else if (!modal && isInitialized) {
+        console.log('UYAP modal closed');
+        cleanupExtension();
       }
-    }
+    }, 150);
   });
 
   // Start observing

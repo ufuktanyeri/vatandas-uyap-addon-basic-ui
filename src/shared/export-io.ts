@@ -136,13 +136,8 @@ export function addDownloadedEvrak(
     }
   ];
 
-  const downloadedCount = updatedEvraklar.filter(
-    e => e.status === 'completed'
-  ).length;
-
-  const failedCount = updatedEvraklar.filter(
-    e => e.status === 'failed'
-  ).length;
+  const downloadedCount = exportData.stats.downloadedEvrak + (status === 'completed' ? 1 : 0);
+  const failedCount = exportData.stats.failedEvrak + (status === 'failed' ? 1 : 0);
 
   return {
     ...exportData,

@@ -18,8 +18,3 @@ chrome.runtime.onInstalled.addListener((details) => {
   }
 });
 
-// Keep service worker alive (optional, for debugging)
-chrome.runtime.onMessage.addListener(() => {
-  // Message listener keeps service worker alive
-  return false;
-});

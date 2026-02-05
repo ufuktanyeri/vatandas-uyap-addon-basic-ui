@@ -20,16 +20,44 @@ function matchBytes(header: Uint8Array, magic: readonly number[]): boolean {
 }
 
 /**
- * Detect file type from magic bytes
- * CRITICAL: Dual-layer check (Content-Type + Magic Bytes) for session detection
+ * Map MIME type string to file info (fallback when file:/// is blocked)
  */
-async function detectFileType(filepath: string): Promise<{
+function mimeToFileInfo(mime: string): {
+  type: string;
+  mimeType: string;
+  extension: string;
+} {
+  switch (mime) {
+    case 'application/pdf':
+      return { type: 'pdf', mimeType: MIME_TYPES.PDF, extension: FILE_EXTENSIONS.PDF };
+    case 'application/zip':
+    case 'application/x-zip-compressed':
+      return { type: 'udf', mimeType: MIME_TYPES.UDF, extension: FILE_EXTENSIONS.UDF };
+    case 'image/tiff':
+      return { type: 'tiff', mimeType: MIME_TYPES.TIFF, extension: FILE_EXTENSIONS.TIFF };
+    case 'text/html':
+      return { type: 'html', mimeType: MIME_TYPES.HTML, extension: FILE_EXTENSIONS.HTML };
+    default:
+      return { type: 'unknown', mimeType: MIME_TYPES.UNKNOWN, extension: '' };
+  }
+}
+
+/**
+ * Detect file type from magic bytes with MIME type fallback
+ * CRITICAL: Dual-layer check (Content-Type + Magic Bytes) for session detection
+ * NOTE: file:/// fetch may be blocked in MV3 service workers depending on
+ * Chrome version and extension permissions. Falls back to MIME type in that case.
+ */
+async function detectFileType(
+  filepath: string,
+  fallbackMime?: string
+): Promise<{
   type: string;
   mimeType: string;
   extension: string;
 }> {
   try {
-    // Read the file
+    // Read the file via file:// protocol
     const response = await fetch(`file:///${filepath}`);
     const blob = await response.blob();
 
@@ -78,7 +106,13 @@ async function detectFileType(filepath: string): Promise<{
       extension: ''
     };
   } catch (error) {
-    console.error('Error detecting file type:', error);
+    // file:/// fetch blocked by browser security policy - fall back to MIME type
+    console.warn('file:/// fetch failed, using MIME type fallback:', error);
+
+    if (fallbackMime) {
+      return mimeToFileInfo(fallbackMime);
+    }
+
     return {
       type: 'unknown',
       mimeType: MIME_TYPES.UNKNOWN,
@@ -148,8 +182,16 @@ async function processDownload(
   try {
     console.log('Processing download:', downloadId, downloadPath);
 
-    // Detect file type
-    const fileInfo = await detectFileType(downloadPath);
+    // Get download info (MIME type fallback for file:// restriction, fileSize for reporting)
+    const downloadInfo = await new Promise<chrome.downloads.DownloadItem[]>(
+      (resolve) => chrome.downloads.search({ id: downloadId }, resolve)
+    );
+    const downloadItem = downloadInfo[0];
+    const fallbackMime = downloadItem?.mime || '';
+    const fileSize = downloadItem?.fileSize || 0;
+
+    // Detect file type (magic bytes with MIME type fallback)
+    const fileInfo = await detectFileType(downloadPath, fallbackMime);
 
     // CRITICAL: Session expired check
     if (fileInfo.type === 'html') {
@@ -187,12 +229,6 @@ async function processDownload(
     // Move file to target directory
     const fileName = `${metadata.evrakName}${fileInfo.extension}`;
     await moveToTargetFolder(downloadPath, fileName, metadata.relativePath);
-
-    // Get file size from download info
-    const downloadResults = await new Promise<chrome.downloads.DownloadItem[]>(
-      (resolve) => chrome.downloads.search({ id: downloadId }, resolve)
-    );
-    const fileSize = downloadResults[0]?.fileSize || 0;
 
     // Notify content script of successful download
     chrome.tabs.sendMessage(metadata.tabId, {

@@ -26,6 +26,9 @@ export const sidebarVisible = signal<boolean>(false);
 // Session state
 export const sessionExpired = signal<boolean>(false);
 
+// User identity (for export manifest)
+export const kisiAdi = signal<string>('');
+
 // Computed: Evrakları klasörlere göre grupla
 export const grupluEvraklar = computed(() => {
   const groups = new Map<string, EvrakItem[]>();

@@ -1,0 +1,25 @@
+{
+  "name": "uyap-dosya-indirici",
+  "version": "1.0.0",
+  "description": "UYAP Vatandaş Portal'ından dava dosyalarını tree-view yapısına uygun şekilde seçmeli indirme",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "preact": "^10.19.0",
+    "@preact/signals": "^1.2.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.0",
+    "vite": "^5.0.0",
+    "@preact/preset-vite": "^2.8.0",
+    "@crxjs/vite-plugin": "^2.0.0",
+    "tailwindcss": "^3.4.0",
+    "autoprefixer": "^10.4.0",
+    "postcss": "^8.4.0",
+    "@types/chrome": "^0.0.258"
+  }
+}

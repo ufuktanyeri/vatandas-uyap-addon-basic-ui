@@ -1,0 +1,77 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Sidebar container - fixed to right side of UYAP modal */
+.uyap-ext-sidebar {
+  position: fixed;
+  right: 0;
+  top: 0;
+  width: 320px;
+  height: 100vh;
+  background: white;
+  border-left: 1px solid #e5e7eb;
+  z-index: 10000;
+  overflow-y: auto;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  box-shadow: -2px 0 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Scrollbar styling */
+.uyap-ext-sidebar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.uyap-ext-sidebar::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.uyap-ext-sidebar::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+.uyap-ext-sidebar::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* Reset default styles that might conflict with UYAP */
+.uyap-ext-sidebar * {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+.uyap-ext-sidebar button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.uyap-ext-sidebar input[type="checkbox"] {
+  cursor: pointer;
+}
+
+/* Progress bar animation */
+@keyframes uyap-progress {
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 40px 40px;
+  }
+}
+
+.uyap-progress-bar-animated {
+  animation: uyap-progress 1s linear infinite;
+  background-image: linear-gradient(
+    45deg,
+    rgba(255, 255, 255, 0.15) 25%,
+    transparent 25%,
+    transparent 50%,
+    rgba(255, 255, 255, 0.15) 50%,
+    rgba(255, 255, 255, 0.15) 75%,
+    transparent 75%,
+    transparent
+  );
+  background-size: 40px 40px;
+}

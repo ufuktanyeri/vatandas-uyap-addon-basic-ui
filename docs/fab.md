@@ -31,21 +31,30 @@ html
      ======================================== -->
 
 <!-- CSS Dependencies (CDN) -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" 
-      integrity="sha512-SfTiTlX6kk+qitfevl/7LibUOeJWlt9rbyDn92a1DqWOw9vWG2MFoays0sgObmWazO5BQPiFucnnEAjpAB+/Sw==" 
-      crossorigin="anonymous" />
+<link
+  rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
+  integrity="sha512-SfTiTlX6kk+qitfevl/7LibUOeJWlt9rbyDn92a1DqWOw9vWG2MFoays0sgObmWazO5BQPiFucnnEAjpAB+/Sw=="
+  crossorigin="anonymous"
+/>
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.12/themes/default/style.min.css" 
-      integrity="sha512-6qBJOYAbVpWzxJJMmX1JQQN1V6zzoOgZzE6JY9P3GZ2r0cJu3h9gPL2xZwVWOK6fF9LI3MQEq3wHXGgCHcBvmA==" 
-      crossorigin="anonymous" />
+<link
+  rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.12/themes/default/style.min.css"
+  integrity="sha512-6qBJOYAbVpWzxJJMmX1JQQN1V6zzoOgZzE6JY9P3GZ2r0cJu3h9gPL2xZwVWOK6fF9LI3MQEq3wHXGgCHcBvmA=="
+  crossorigin="anonymous"
+/>
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.1.4/toastr.min.css" 
-      integrity="sha512-6S2HWzVFxruDlZxI3sXOZZ4/eJ8AcxkQH1+JjSe/ONCEqR9L4Ysq5JdT5ipqtzU7WHalNwzwBv+iE51gNHJNqQ==" 
-      crossorigin="anonymous" />
+<link
+  rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.1.4/toastr.min.css"
+  integrity="sha512-6S2HWzVFxruDlZxI3sXOZZ4/eJ8AcxkQH1+JjSe/ONCEqR9L4Ysq5JdT5ipqtzU7WHalNwzwBv+iE51gNHJNqQ=="
+  crossorigin="anonymous"
+/>
 
 <!-- Custom CSS for FAB -->
 <style id="uyap-download-fab-styles">
-/* Burada yukarıdaki CSS kodunu ekleyin */
+  /* Burada yukarıdaki CSS kodunu ekleyin */
 </style>
 
 <!-- FAB HTML -->
@@ -56,56 +65,69 @@ html
 <!-- JavaScript Dependencies (CDN) -->
 <!-- jQuery (Fallback - UYAP'ta zaten var ama garantiye alalım) -->
 <script>
-  if (typeof jQuery === 'undefined') {
-    document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"><\\/script>');
+  if (typeof jQuery === "undefined") {
+    document.write(
+      '<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"><\\/script>',
+    );
   }
 </script>
 
 <!-- jsTree -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.12/jstree.min.js" 
-        integrity="sha512-zCJUc+3FdZGPYvH8A8ezc2DGiKuqLDwLlBLb2uu9OXLvH5pLnCbhfT/e8RM5W5R2X/8B4skfVuPAKJVqT5zZnQ==" 
-        crossorigin="anonymous"></script>
+<script
+  src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.12/jstree.min.js"
+  integrity="sha512-zCJUc+3FdZGPYvH8A8ezc2DGiKuqLDwLlBLb2uu9OXLvH5pLnCbhfT/e8RM5W5R2X/8B4skfVuPAKJVqT5zZnQ=="
+  crossorigin="anonymous"
+></script>
 
 <!-- Toastr -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.1.4/toastr.min.js" 
-        integrity="sha512-lbwH47l/tPXJYG9AcFNoJaTMhGvYWhVM9YI43CT+uteTRRaiLCui8snIgyAN8XWgNjNhCqlAUdzZptso6OCoFQ==" 
-        crossorigin="anonymous"></script>
+<script
+  src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.1.4/toastr.min.js"
+  integrity="sha512-lbwH47l/tPXJYG9AcFNoJaTMhGvYWhVM9YI43CT+uteTRRaiLCui8snIgyAN8XWgNjNhCqlAUdzZptso6OCoFQ=="
+  crossorigin="anonymous"
+></script>
 
 <!-- Custom JavaScript for FAB -->
 <script id="uyap-download-fab-script">
-(function() {
-  'use strict';
+  (function () {
+    "use strict";
 
-  // Dependency Check
-  if (typeof jQuery === 'undefined') {
-    console.error('UYAP Download FAB: jQuery not loaded!');
-    return;
-  }
+    // Dependency Check
+    if (typeof jQuery === "undefined") {
+      console.error("UYAP Download FAB: jQuery not loaded!");
+      return;
+    }
 
-  var $ = jQuery.noConflict(true); // UYAP'ın jQuery'si ile çakışma olmasın
+    var $ = jQuery.noConflict(true); // UYAP'ın jQuery'si ile çakışma olmasın
 
-  // jsTree kontrolü
-  if (!$.fn.jstree) {
-    console.error('UYAP Download FAB: jsTree not loaded!');
-    // Fallback: Basit tree göster
-    window.UYAP_DOWNLOAD_FAB_NO_JSTREE = true;
-  }
+    // jsTree kontrolü
+    if (!$.fn.jstree) {
+      console.error("UYAP Download FAB: jsTree not loaded!");
+      // Fallback: Basit tree göster
+      window.UYAP_DOWNLOAD_FAB_NO_JSTREE = true;
+    }
 
-  // Toastr kontrolü
-  if (typeof toastr === 'undefined') {
-    console.warn('UYAP Download FAB: Toastr not loaded, using console.log');
-    window.toastr = {
-      success: function(msg) { console.log('SUCCESS:', msg); },
-      error: function(msg) { console.error('ERROR:', msg); },
-      warning: function(msg) { console.warn('WARNING:', msg); },
-      info: function(msg) { console.info('INFO:', msg); }
-    };
-  }
+    // Toastr kontrolü
+    if (typeof toastr === "undefined") {
+      console.warn("UYAP Download FAB: Toastr not loaded, using console.log");
+      window.toastr = {
+        success: function (msg) {
+          console.log("SUCCESS:", msg);
+        },
+        error: function (msg) {
+          console.error("ERROR:", msg);
+        },
+        warning: function (msg) {
+          console.warn("WARNING:", msg);
+        },
+        info: function (msg) {
+          console.info("INFO:", msg);
+        },
+      };
+    }
 
-  // Buraya yukarıdaki JavaScript kodunu ekleyin
-  // ...
-
-})();
+    // Buraya yukarıdaki JavaScript kodunu ekleyin
+    // ...
+  })();
 </script>
 ```
 
@@ -123,50 +145,65 @@ javascript
    Önce UYAP'ınkileri kontrol et, yoksa CDN'den yükle
    ======================================== */
 
-(function() {
-  'use strict';
+(function () {
+  "use strict";
 
   var DEPENDENCIES = {
     jquery: {
-      check: function() { return typeof jQuery !== 'undefined'; },
-      cdn: 'https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js',
-      integrity: 'sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ==',
-      variable: 'jQuery'
+      check: function () {
+        return typeof jQuery !== "undefined";
+      },
+      cdn: "https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js",
+      integrity:
+        "sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ==",
+      variable: "jQuery",
     },
     jstree: {
-      check: function() { return typeof jQuery !== 'undefined' && typeof jQuery.fn.jstree !== 'undefined'; },
-      cdn: 'https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.12/jstree.min.js',
-      integrity: 'sha512-zCJUc+3FdZGPYvH8A8ezc2DGiKuqLDwLlBLb2uu9OXLvH5pLnCbhfT/e8RM5W5R2X/8B4skfVuPAKJVqT5zZnQ==',
-      css: 'https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.12/themes/default/style.min.css',
-      requires: ['jquery']
+      check: function () {
+        return (
+          typeof jQuery !== "undefined" &&
+          typeof jQuery.fn.jstree !== "undefined"
+        );
+      },
+      cdn: "https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.12/jstree.min.js",
+      integrity:
+        "sha512-zCJUc+3FdZGPYvH8A8ezc2DGiKuqLDwLlBLb2uu9OXLvH5pLnCbhfT/e8RM5W5R2X/8B4skfVuPAKJVqT5zZnQ==",
+      css: "https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.12/themes/default/style.min.css",
+      requires: ["jquery"],
     },
     toastr: {
-      check: function() { return typeof toastr !== 'undefined'; },
-      cdn: 'https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.1.4/toastr.min.js',
-      integrity: 'sha512-lbwH47l/tPXJYG9AcFNoJaTMhGvYWhVM9YI43CT+uteTRRaiLCui8snIgyAN8XWgNjNhCqlAUdzZptso6OCoFQ==',
-      css: 'https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.1.4/toastr.min.css',
-      requires: ['jquery']
+      check: function () {
+        return typeof toastr !== "undefined";
+      },
+      cdn: "https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.1.4/toastr.min.js",
+      integrity:
+        "sha512-lbwH47l/tPXJYG9AcFNoJaTMhGvYWhVM9YI43CT+uteTRRaiLCui8snIgyAN8XWgNjNhCqlAUdzZptso6OCoFQ==",
+      css: "https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.1.4/toastr.min.css",
+      requires: ["jquery"],
     },
     fontawesome: {
-      check: function() { return document.querySelector('link[href*="font-awesome"]') !== null; },
-      css: 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css',
-      integrity: 'sha512-SfTiTlX6kk+qitfevl/7LibUOeJWlt9rbyDn92a1DqWOw9vWG2MFoays0sgObmWazO5BQPiFucnnEAjpAB+/Sw=='
-    }
+      check: function () {
+        return document.querySelector('link[href*="font-awesome"]') !== null;
+      },
+      css: "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css",
+      integrity:
+        "sha512-SfTiTlX6kk+qitfevl/7LibUOeJWlt9rbyDn92a1DqWOw9vWG2MFoays0sgObmWazO5BQPiFucnnEAjpAB+/Sw==",
+    },
   };
 
   var loadedDeps = {};
 
   // CSS Yükleyici
   function loadCSS(url, integrity) {
-    return new Promise(function(resolve) {
-      var link = document.createElement('link');
-      link.rel = 'stylesheet';
+    return new Promise(function (resolve) {
+      var link = document.createElement("link");
+      link.rel = "stylesheet";
       link.href = url;
       if (integrity) link.integrity = integrity;
-      link.crossOrigin = 'anonymous';
+      link.crossOrigin = "anonymous";
       link.onload = resolve;
-      link.onerror = function() {
-        console.warn('Failed to load CSS:', url);
+      link.onerror = function () {
+        console.warn("Failed to load CSS:", url);
         resolve(); // Hata olsa bile devam et
       };
       document.head.appendChild(link);
@@ -175,14 +212,14 @@ javascript
 
   // JS Yükleyici
   function loadJS(url, integrity) {
-    return new Promise(function(resolve, reject) {
-      var script = document.createElement('script');
+    return new Promise(function (resolve, reject) {
+      var script = document.createElement("script");
       script.src = url;
       if (integrity) script.integrity = integrity;
-      script.crossOrigin = 'anonymous';
+      script.crossOrigin = "anonymous";
       script.onload = resolve;
-      script.onerror = function() {
-        console.error('Failed to load JS:', url);
+      script.onerror = function () {
+        console.error("Failed to load JS:", url);
         reject();
       };
       document.head.appendChild(script);
@@ -191,28 +228,32 @@ javascript
 
   // Dependency Loader
   function loadDependency(name) {
-    return new Promise(function(resolve) {
+    return new Promise(function (resolve) {
       var dep = DEPENDENCIES[name];
 
       if (!dep) {
-        console.warn('Unknown dependency:', name);
+        console.warn("Unknown dependency:", name);
         return resolve();
       }
 
       // Zaten yüklü mü kontrol et
       if (dep.check()) {
-        console.log('UYAP Download FAB:', name, 'already loaded (using UYAP version)');
-        loadedDeps[name] = 'uyap';
+        console.log(
+          "UYAP Download FAB:",
+          name,
+          "already loaded (using UYAP version)",
+        );
+        loadedDeps[name] = "uyap";
         return resolve();
       }
 
       // Bağımlılıkları kontrol et
       if (dep.requires) {
-        var promises = dep.requires.map(function(reqName) {
+        var promises = dep.requires.map(function (reqName) {
           return loadDependency(reqName);
         });
 
-        Promise.all(promises).then(function() {
+        Promise.all(promises).then(function () {
           loadDep();
         });
       } else {
@@ -232,15 +273,17 @@ javascript
           promises.push(loadJS(dep.cdn, dep.integrity));
         }
 
-        Promise.all(promises).then(function() {
-          console.log('UYAP Download FAB:', name, 'loaded from CDN');
-          loadedDeps[name] = 'cdn';
-          resolve();
-        }).catch(function() {
-          console.error('UYAP Download FAB: Failed to load', name);
-          loadedDeps[name] = 'failed';
-          resolve(); // Hata olsa bile devam et
-        });
+        Promise.all(promises)
+          .then(function () {
+            console.log("UYAP Download FAB:", name, "loaded from CDN");
+            loadedDeps[name] = "cdn";
+            resolve();
+          })
+          .catch(function () {
+            console.error("UYAP Download FAB: Failed to load", name);
+            loadedDeps[name] = "failed";
+            resolve(); // Hata olsa bile devam et
+          });
       }
     });
   }
@@ -248,28 +291,28 @@ javascript
   // Tüm Bağımlılıkları Yükle
   function loadAllDependencies() {
     return Promise.all([
-      loadDependency('fontawesome'),
-      loadDependency('jquery'),
-      loadDependency('jstree'),
-      loadDependency('toastr')
+      loadDependency("fontawesome"),
+      loadDependency("jquery"),
+      loadDependency("jstree"),
+      loadDependency("toastr"),
     ]);
   }
 
   // Sayfa yüklendiğinde başlat
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
   } else {
     init();
   }
 
   function init() {
-    console.log('UYAP Download FAB: Loading dependencies...');
+    console.log("UYAP Download FAB: Loading dependencies...");
 
-    loadAllDependencies().then(function() {
-      console.log('UYAP Download FAB: All dependencies loaded', loadedDeps);
+    loadAllDependencies().then(function () {
+      console.log("UYAP Download FAB: All dependencies loaded", loadedDeps);
 
       // Ana FAB kodunu başlat
-      setTimeout(function() {
+      setTimeout(function () {
         initDownloadFAB();
       }, 100);
     });
@@ -278,8 +321,10 @@ javascript
   // Ana FAB Kodu
   function initDownloadFAB() {
     // jQuery kontrolü
-    if (typeof jQuery === 'undefined') {
-      console.error('UYAP Download FAB: jQuery failed to load, cannot initialize');
+    if (typeof jQuery === "undefined") {
+      console.error(
+        "UYAP Download FAB: jQuery failed to load, cannot initialize",
+      );
       return;
     }
 
@@ -287,26 +332,35 @@ javascript
 
     // Fallback mekanizmaları
     if (!$.fn.jstree) {
-      console.warn('UYAP Download FAB: jsTree not available, using simple list view');
+      console.warn(
+        "UYAP Download FAB: jsTree not available, using simple list view",
+      );
       window.UYAP_FAB_USE_SIMPLE_TREE = true;
     }
 
-    if (typeof toastr === 'undefined') {
-      console.warn('UYAP Download FAB: Toastr not available, using alerts');
+    if (typeof toastr === "undefined") {
+      console.warn("UYAP Download FAB: Toastr not available, using alerts");
       window.toastr = {
-        success: function(msg) { alert('✓ ' + msg); },
-        error: function(msg) { alert('✗ ' + msg); },
-        warning: function(msg) { alert('⚠ ' + msg); },
-        info: function(msg) { alert('ℹ ' + msg); }
+        success: function (msg) {
+          alert("✓ " + msg);
+        },
+        error: function (msg) {
+          alert("✗ " + msg);
+        },
+        warning: function (msg) {
+          alert("⚠ " + msg);
+        },
+        info: function (msg) {
+          alert("ℹ " + msg);
+        },
       };
     }
 
     // Buraya ana FAB kodunu ekle
     // ...
 
-    console.log('UYAP Download FAB: Initialized successfully!');
+    console.log("UYAP Download FAB: Initialized successfully!");
   }
-
 })();
 ```
 
@@ -331,12 +385,12 @@ javascript
    <script src="uyap-download-fab.js"></script>
    ======================================== */
 
-(function(window, document) {
-  'use strict';
+(function (window, document) {
+  "use strict";
 
   // Versiyon bilgisi
-  var VERSION = '1.0.0';
-  var NAMESPACE = 'UYAP_DOWNLOAD_FAB';
+  var VERSION = "1.0.0";
+  var NAMESPACE = "UYAP_DOWNLOAD_FAB";
 
   // Global namespace oluştur
   window[NAMESPACE] = {
@@ -347,8 +401,8 @@ javascript
       cdnFallback: true,
       debug: true,
       position: { bottom: 270, right: 20 },
-      zIndex: 10106
-    }
+      zIndex: 10106,
+    },
   };
 
   var FAB = window[NAMESPACE];
@@ -356,45 +410,56 @@ javascript
   // Debug logger
   function log(message, data) {
     if (FAB.config.debug) {
-      console.log('[UYAP FAB]', message, data || '');
+      console.log("[UYAP FAB]", message, data || "");
     }
   }
 
   // CDN Resources
   var CDN_RESOURCES = {
     jquery: {
-      url: 'https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js',
-      check: function() { return typeof jQuery !== 'undefined'; },
-      global: 'jQuery'
+      url: "https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js",
+      check: function () {
+        return typeof jQuery !== "undefined";
+      },
+      global: "jQuery",
     },
     jstree: {
-      url: 'https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.12/jstree.min.js',
-      css: 'https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.12/themes/default/style.min.css',
-      check: function() { return typeof jQuery !== 'undefined' && typeof jQuery.fn.jstree !== 'undefined'; },
-      requires: ['jquery']
+      url: "https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.12/jstree.min.js",
+      css: "https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.12/themes/default/style.min.css",
+      check: function () {
+        return (
+          typeof jQuery !== "undefined" &&
+          typeof jQuery.fn.jstree !== "undefined"
+        );
+      },
+      requires: ["jquery"],
     },
     toastr: {
-      url: 'https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.1.4/toastr.min.js',
-      css: 'https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.1.4/toastr.min.css',
-      check: function() { return typeof toastr !== 'undefined'; },
-      requires: ['jquery']
+      url: "https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.1.4/toastr.min.js",
+      css: "https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.1.4/toastr.min.css",
+      check: function () {
+        return typeof toastr !== "undefined";
+      },
+      requires: ["jquery"],
     },
     fontawesome: {
-      css: 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css',
-      check: function() { return !!document.querySelector('link[href*="font-awesome"]'); }
-    }
+      css: "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css",
+      check: function () {
+        return !!document.querySelector('link[href*="font-awesome"]');
+      },
+    },
   };
 
   // Asset Loader
   var AssetLoader = {
-    loadCSS: function(url) {
-      return new Promise(function(resolve) {
+    loadCSS: function (url) {
+      return new Promise(function (resolve) {
         if (document.querySelector('link[href="' + url + '"]')) {
           return resolve();
         }
 
-        var link = document.createElement('link');
-        link.rel = 'stylesheet';
+        var link = document.createElement("link");
+        link.rel = "stylesheet";
         link.href = url;
         link.onload = resolve;
         link.onerror = resolve;
@@ -402,13 +467,13 @@ javascript
       });
     },
 
-    loadJS: function(url) {
-      return new Promise(function(resolve, reject) {
+    loadJS: function (url) {
+      return new Promise(function (resolve, reject) {
         if (document.querySelector('script[src="' + url + '"]')) {
           return resolve();
         }
 
-        var script = document.createElement('script');
+        var script = document.createElement("script");
         script.src = url;
         script.onload = resolve;
         script.onerror = reject;
@@ -416,24 +481,24 @@ javascript
       });
     },
 
-    loadResource: function(name) {
+    loadResource: function (name) {
       var resource = CDN_RESOURCES[name];
       if (!resource) return Promise.resolve();
 
       // Zaten yüklü mü?
       if (resource.check()) {
-        log(name + ' already loaded');
-        FAB.dependencies[name] = 'native';
+        log(name + " already loaded");
+        FAB.dependencies[name] = "native";
         return Promise.resolve();
       }
 
       // Bağımlılıkları yükle
       var deps = resource.requires || [];
-      var depPromises = deps.map(function(dep) {
+      var depPromises = deps.map(function (dep) {
         return AssetLoader.loadResource(dep);
       });
 
-      return Promise.all(depPromises).then(function() {
+      return Promise.all(depPromises).then(function () {
         var promises = [];
 
         if (resource.css) {
@@ -444,12 +509,12 @@ javascript
           promises.push(AssetLoader.loadJS(resource.url));
         }
 
-        return Promise.all(promises).then(function() {
-          log(name + ' loaded from CDN');
-          FAB.dependencies[name] = 'cdn';
+        return Promise.all(promises).then(function () {
+          log(name + " loaded from CDN");
+          FAB.dependencies[name] = "cdn";
         });
       });
-    }
+    },
   };
 
   // HTML Injector
@@ -461,8 +526,8 @@ javascript
       /* ... */
     `;
 
-    var style = document.createElement('style');
-    style.id = 'uyap-fab-styles';
+    var style = document.createElement("style");
+    style.id = "uyap-fab-styles";
     style.textContent = css;
     document.head.appendChild(style);
 
@@ -471,43 +536,45 @@ javascript
       <!-- Yukarıdaki HTML kodunu buraya -->
     `;
 
-    var wrapper = document.createElement('div');
+    var wrapper = document.createElement("div");
     wrapper.innerHTML = html;
     document.body.appendChild(wrapper.firstElementChild);
 
-    log('HTML injected');
+    log("HTML injected");
   }
 
   // Main Initialization
   function initFAB() {
     if (FAB.loaded) {
-      log('Already initialized');
+      log("Already initialized");
       return;
     }
 
-    log('Initializing...');
+    log("Initializing...");
 
     // Dependencies yükle
     Promise.all([
-      AssetLoader.loadResource('fontawesome'),
-      AssetLoader.loadResource('jquery'),
-      AssetLoader.loadResource('jstree'),
-      AssetLoader.loadResource('toastr')
-    ]).then(function() {
-      log('All dependencies loaded', FAB.dependencies);
+      AssetLoader.loadResource("fontawesome"),
+      AssetLoader.loadResource("jquery"),
+      AssetLoader.loadResource("jstree"),
+      AssetLoader.loadResource("toastr"),
+    ])
+      .then(function () {
+        log("All dependencies loaded", FAB.dependencies);
 
-      // HTML inject et
-      injectHTML();
+        // HTML inject et
+        injectHTML();
 
-      // Ana kodu çalıştır
-      setTimeout(function() {
-        initMainLogic();
-      }, 100);
+        // Ana kodu çalıştır
+        setTimeout(function () {
+          initMainLogic();
+        }, 100);
 
-      FAB.loaded = true;
-    }).catch(function(err) {
-      console.error('[UYAP FAB] Failed to load dependencies:', err);
-    });
+        FAB.loaded = true;
+      })
+      .catch(function (err) {
+        console.error("[UYAP FAB] Failed to load dependencies:", err);
+      });
   }
 
   // Ana FAB Mantığı
@@ -517,29 +584,28 @@ javascript
     // Yukarıdaki JavaScript kodunu buraya ekle
     // ...
 
-    log('FAB initialized successfully!');
+    log("FAB initialized successfully!");
   }
 
   // Auto-init
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initFAB);
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initFAB);
   } else {
     initFAB();
   }
 
   // Public API
   FAB.reload = initFAB;
-  FAB.destroy = function() {
-    var elem = document.getElementById('uyapDownloadFabWrapper');
+  FAB.destroy = function () {
+    var elem = document.getElementById("uyapDownloadFabWrapper");
     if (elem) elem.remove();
 
-    var style = document.getElementById('uyap-fab-styles');
+    var style = document.getElementById("uyap-fab-styles");
     if (style) style.remove();
 
     FAB.loaded = false;
-    log('Destroyed');
+    log("Destroyed");
   };
-
 })(window, document);
 ```
 
@@ -561,8 +627,8 @@ javascript
 
 ```javascript
 // content_script.js
-chrome.runtime.sendMessage({action: 'injectFAB'}, function(response) {
-  console.log('FAB injected');
+chrome.runtime.sendMessage({ action: "injectFAB" }, function (response) {
+  console.log("FAB injected");
 });
 ```
 
@@ -571,14 +637,18 @@ chrome.runtime.sendMessage({action: 'injectFAB'}, function(response) {
 javascript
 
 ```javascript
-javascript:(function(){var s=document.createElement('script');s.src='https://your-cdn.com/uyap-download-fab.min.js';document.head.appendChild(s);})();
+javascript: (function () {
+  var s = document.createElement("script");
+  s.src = "https://your-cdn.com/uyap-download-fab.min.js";
+  document.head.appendChild(s);
+})();
 ```
 
 ---
 
 ## Avantajları
 
-### Tamamen Bağımsız:**
+### Tamamen Bağımsız:\*\*
 
 - UYAP'ın kaynaklarına bağımlı değil
 - Tasarım değişse bile çalışır
@@ -622,7 +692,7 @@ Harika soru! İşte detaylı analiz:
 │  Kırmızı, 196×180px            │ z-index: 10103
 │  (Hamburger Menu)              │
 │                                │
-│  [📥] Download FAB (BİZİMKİ)  │ bottom: ??? 
+│  [📥] Download FAB (BİZİMKİ)  │ bottom: ???
 │  Mavi, 56×56px                 │ z-index: ???
 │  (YENİ - NEREYE?)              │
 │                                │
@@ -732,11 +802,11 @@ javascript
 ```javascript
 // Sayfa içeriğine göre otomatik konumlandır
 if (modalOpen) {
-  position: 'fixed to modal' // Modal içinde
+  position: "fixed to modal"; // Modal içinde
 } else if (scrolled > 300) {
-  position: 'sticky top' // Yukarıda sabit
+  position: "sticky top"; // Yukarıda sabit
 } else {
-  position: 'bottom: 270px' // Normal konum
+  position: "bottom: 270px"; // Normal konum
 }
 ```
 
@@ -775,45 +845,45 @@ javascript
 function getOptimalPosition() {
   var context = detectContext();
 
-  switch(context) {
-    case 'dosya-sorgulama-modal-open':
+  switch (context) {
+    case "dosya-sorgulama-modal-open":
       // Modal açıksa, modalın içine inject et
       return {
-        type: 'modal-inject',
-        target: '.modal .modal-header .tools'
+        type: "modal-inject",
+        target: ".modal .modal-header .tools",
       };
 
-    case 'dosya-sorgulama-results':
+    case "dosya-sorgulama-results":
       // Sonuç tablosu görünüyorsa, üstte olsun
       return {
-        type: 'fixed',
-        bottom: 270,
-        right: 20,
-        zIndex: 10106
-      };
-
-    case 'dosya-sorgulama-empty':
-      // Henüz sonuç yoksa, gizle veya pasif göster
-      return {
-        type: 'fixed',
+        type: "fixed",
         bottom: 270,
         right: 20,
         zIndex: 10106,
-        disabled: true
       };
 
-    case 'other-page':
+    case "dosya-sorgulama-empty":
+      // Henüz sonuç yoksa, gizle veya pasif göster
+      return {
+        type: "fixed",
+        bottom: 270,
+        right: 20,
+        zIndex: 10106,
+        disabled: true,
+      };
+
+    case "other-page":
       // Başka sayfadaysa, gösterme
       return {
-        type: 'hidden'
+        type: "hidden",
       };
 
     default:
       return {
-        type: 'fixed',
+        type: "fixed",
         bottom: 270,
         right: 20,
-        zIndex: 10106
+        zIndex: 10106,
       };
   }
 }
@@ -821,20 +891,20 @@ function getOptimalPosition() {
 function detectContext() {
   // Modal açık mı?
   if ($('.modal.fade.in[id*="dosya"]').length > 0) {
-    return 'dosya-sorgulama-modal-open';
+    return "dosya-sorgulama-modal-open";
   }
 
   // Dosya Sorgulama sayfasında mıyız?
-  if (window.location.href.includes('menuId=12573')) {
+  if (window.location.href.includes("menuId=12573")) {
     // Sonuç var mı?
-    if ($('.dataTable tbody tr').length > 0) {
-      return 'dosya-sorgulama-results';
+    if ($(".dataTable tbody tr").length > 0) {
+      return "dosya-sorgulama-results";
     } else {
-      return 'dosya-sorgulama-empty';
+      return "dosya-sorgulama-empty";
     }
   }
 
-  return 'other-page';
+  return "other-page";
 }
 ```
 
@@ -843,6 +913,7 @@ function detectContext() {
 ## 📍 Final Öneri: **3 Konum Stratejisi**
 
 ### **Durum 1: Modal Kapalı, Sayfa İlk Yüklendiğinde**
+
 ```
 Position: bottom: 270px (1st - En üstte)
 Görünürlük: %100
@@ -850,6 +921,7 @@ Amaç: "Ben buradayım" demek
 ```
 
 ### **Durum 2: Modal Açık, Evrak Sekmesinde**
+
 ```
 Position: Modal içinde (header tools kısmında)
 Görünürlük: %100 (context-aware)
@@ -857,6 +929,7 @@ Amaç: "İşte evrakları indir" demek
 ```
 
 ### **Durum 3: Modal Açık, Diğer Sekmelerde**
+
 ```
 Position: bottom: 140px (3rd - Ortada)
 Görünürlük: %50 (pasif/opacity)
@@ -922,6 +995,7 @@ css
 4. **Context-aware**: Akıllı davranır
 5. **Uzun vadeli**: UYAP değişse bile etkilenmez
 6. **UX**: Kullanıcı yolculuğunu takip eder
+
 ```
 1. Kullanıcı Dosya Sorgulama'ya girer
    → FAB görünür (bottom: 270px - En üstte)
@@ -936,4 +1010,4 @@ css
    → Panel açılır, progress gösterilir
 ```
 
-Bu yaklaşım **hem görünürlük hem UX** açısından en optimal çözüm! 
+Bu yaklaşım **hem görünürlük hem UX** açısından en optimal çözüm!

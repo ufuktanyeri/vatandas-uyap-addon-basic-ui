@@ -8,6 +8,7 @@ import {
   sessionExpired,
 } from "@store";
 import { render } from "preact";
+import { resetFabPulse } from "@components/ui/Fab";
 import {
   detectPagination,
   findKisiAdi,
@@ -130,6 +131,7 @@ function cleanupExtension() {
   sessionExpired.value = false;
   paginationInfo.value = null;
   kisiAdi.value = "";
+  resetFabPulse();
 
   console.log("Extension signals cleared");
 }

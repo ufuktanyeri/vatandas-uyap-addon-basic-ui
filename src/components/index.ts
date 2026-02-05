@@ -2,7 +2,7 @@ export { Button } from './ui/Button';
 export { Toast } from './ui/Toast';
 export { EmptyState } from './ui/EmptyState';
 export { Modal } from './ui/Modal';
-export { Fab } from './ui/Fab';
+export { Fab, resetFabPulse } from './ui/Fab';
 export { ProgressBar } from './ui/ProgressBar';
 export { SessionAlert } from './ui/SessionAlert';
 export { Sidebar } from './layout/Sidebar';

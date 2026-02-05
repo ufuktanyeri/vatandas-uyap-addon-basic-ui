@@ -48,12 +48,37 @@
   cursor: pointer;
 }
 
-/* FAB - Floating Action Button */
+/* FAB entry animation */
+@keyframes uyap-fab-enter {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* FAB pulse animation (box-shadow only - GPU friendly) */
+@keyframes uyap-fab-pulse {
+  0%, 100% {
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+  }
+  50% {
+    box-shadow: 0 4px 20px rgba(37, 99, 235, 0.7), 0 0 0 8px rgba(37, 99, 235, 0.1);
+  }
+}
+
+/* FAB - Floating Action Button
+   Stack order (bottom to top): Quick Nav → RW Widget → Accessibility → Extension
+   Accessibility is at bottom:130px + ~65px height = 195px top edge
+   We place at bottom:270px for safe clearance above all UYAP FABs */
 .uyap-ext-fab {
   position: fixed;
   right: 20px;
-  bottom: 20px;
-  z-index: 10000;
+  bottom: 270px;
+  z-index: 10106;
   width: 56px;
   height: 56px;
   border-radius: 50%;
@@ -67,23 +92,50 @@
   box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
   transition: background-color 0.2s, transform 0.2s, box-shadow 0.2s;
   font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  animation: uyap-fab-enter 0.4s ease-out;
+}
+
+/* Pulse state: entry + pulse chained */
+.uyap-ext-fab--pulse {
+  animation: uyap-fab-enter 0.4s ease-out,
+             uyap-fab-pulse 2s ease-in-out 0.5s infinite;
 }
 
 .uyap-ext-fab:hover {
   background-color: #1d4ed8;
   transform: scale(1.05);
   box-shadow: 0 6px 16px rgba(37, 99, 235, 0.5);
+  animation: none;
 }
 
 .uyap-ext-fab:active {
   transform: scale(0.95);
 }
 
-/* Modal overlay */
+/* Responsive: narrow frames / small screens */
+@media (max-width: 768px) {
+  .uyap-ext-fab {
+    width: 48px;
+    height: 48px;
+    right: 12px;
+    bottom: 180px;
+  }
+}
+
+@media (max-width: 480px) {
+  .uyap-ext-fab {
+    width: 44px;
+    height: 44px;
+    right: 8px;
+    bottom: 160px;
+  }
+}
+
+/* Modal overlay — must be above FAB (10106) and all UYAP FABs */
 .uyap-ext-modal-overlay {
   position: fixed;
   inset: 0;
-  z-index: 10001;
+  z-index: 10107;
   background-color: rgba(0, 0, 0, 0.5);
   display: flex;
   align-items: center;

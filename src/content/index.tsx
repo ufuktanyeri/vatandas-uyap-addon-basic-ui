@@ -98,9 +98,6 @@ async function initExtension() {
       dosyaNo: dosya?.dosyaNo,
       kisiAdi: kisiAdiValue,
     });
-
-    // Render Preact app
-    renderApp();
   } catch (error) {
     console.log("Extension init skipped:", (error as Error).message);
     // Reset flag to allow retry when actual dosya page is opened
@@ -127,12 +124,6 @@ function renderApp() {
  * Clean up when modal is closed
  */
 function cleanupExtension() {
-  if (appContainer) {
-    render(null, appContainer);
-    appContainer.remove();
-    appContainer = null;
-  }
-
   isInitialized = false;
   evraklar.value = [];
   dosyaBilgileri.value = null;
@@ -140,7 +131,7 @@ function cleanupExtension() {
   paginationInfo.value = null;
   kisiAdi.value = "";
 
-  console.log("Extension cleaned up");
+  console.log("Extension signals cleared");
 }
 
 /**
@@ -231,8 +222,10 @@ function observeModal() {
 // Initialize when DOM is ready
 if (document.readyState === "loading") {
   document.addEventListener("DOMContentLoaded", () => {
+    renderApp();
     observeModal();
   });
 } else {
+  renderApp();
   observeModal();
 }

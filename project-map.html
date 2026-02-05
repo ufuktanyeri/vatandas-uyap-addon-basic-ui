@@ -158,7 +158,7 @@
   <header>
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2"><path d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
     <h1>UYAP Dosya İndirici v2</h1>
-    <span>Proje Kaynak Kod Haritası - 37 dosya</span>
+    <span>Proje Kaynak Kod Haritası - 44 dosya</span>
   </header>
   <div class="container">
     <div class="tree-panel" id="tree"></div>
@@ -419,13 +419,13 @@ const FILES = {
   },
   "src/components/index.ts": {
     path: "src/components/index.ts",
-    desc: "Components modülü barrel export dosyası; tüm UI bileşenlerini (Button, Toast, EmptyState, Modal, Fab, ProgressBar, SessionAlert, Sidebar, EvrakCard, EvrakList, EvrakGroup) re-export eder.",
+    desc: "Components modülü barrel export dosyası; tüm UI bileşenlerini (Button, Toast, EmptyState, Modal, Fab, resetFabPulse, ProgressBar, SessionAlert, Sidebar, EvrakCard, EvrakList, EvrakGroup) re-export eder.",
     imports: [
       "Button (./ui/Button) [re-export]",
       "Toast (./ui/Toast) [re-export]",
       "EmptyState (./ui/EmptyState) [re-export]",
       "Modal (./ui/Modal) [re-export]",
-      "Fab (./ui/Fab) [re-export]",
+      "Fab, resetFabPulse (./ui/Fab) [re-export]",
       "ProgressBar (./ui/ProgressBar) [re-export]",
       "SessionAlert (./ui/SessionAlert) [re-export]",
       "Sidebar (./layout/Sidebar) [re-export]",
@@ -487,11 +487,11 @@ const FILES = {
   },
   "src/components/ui/Fab.tsx": {
     path: "src/components/ui/Fab.tsx",
-    desc: "Floating Action Button bileşeni; sayfanın sağ alt köşesinde sabit konumlu 56x56px yuvarlak buton, SVG indirme ikonu içerir.",
+    desc: "Floating Action Button bileşeni; sayfanın sağ alt köşesinde sabit konumlu 56x56px yuvarlak buton, SVG indirme ikonu içerir. İlk tıklamadan sonra pulse animasyonu durur, sayfa navigasyonunda resetFabPulse() ile sıfırlanır.",
     imports: [],
-    vars: [],
+    vars: ["hasBeenClicked (module-level, ilk tıklamada true olur)"],
     consts: [],
-    funcs: ["Fab({ onClick })"],
+    funcs: ["resetFabPulse(): void", "Fab({ onClick })"],
     extra: {
       title: "Type Tanımları",
       items: ["FabProps (interface)"]
@@ -581,12 +581,13 @@ const FILES = {
   },
   "src/content/index.tsx": {
     path: "src/content/index.tsx",
-    desc: "Content script giriş noktası; FAB'ı render eder, MutationObserver ile UYAP dosya modal'ını izler, modal açıldığında evrak taraması başlatır.",
+    desc: "Content script giriş noktası; FAB'ı render eder, MutationObserver ile UYAP dosya modal'ını izler, modal açıldığında evrak taraması başlatır. Modal kapandığında cleanupExtension() ile signal'ları sıfırlar ve FAB pulse'ı resetler.",
     imports: [
       "@/styles/sidebar.css",
       "SELECTORS (@lib)",
       "dosyaBilgileri, evraklar, kisiAdi, paginationInfo, sessionExpired (@store)",
       "render (preact)",
+      "resetFabPulse (@components/ui/Fab)",
       "detectPagination, findKisiAdi, getDosyaBilgileri, scanFiletree, waitForFiletree (./scanner)",
       "App (./ui/App)"
     ],
@@ -638,8 +639,10 @@ const FILES = {
       "arrayBufferToBase64(buffer): string [private]"
     ],
     extra: {
-      title: "Class: Downloader",
+      title: "Class: Downloader + Interface",
       items: [
+        "SingleDownloadResult (interface: success, sessionExpired?, fileName?, mimeType?, fileSize?, error?)",
+        "constructor(onProgress, onSessionExpired)",
         "downloadAll(evraklar, dosya): Promise<void>",
         "downloadWithRetry(evrak, dosya): Promise<SingleDownloadResult> [private]",
         "downloadSingle(evrak, dosya): Promise<SingleDownloadResult> [private]",
@@ -655,12 +658,13 @@ const FILES = {
   },
   "src/content/ui/App.tsx": {
     path: "src/content/ui/App.tsx",
-    desc: "Kök UI bileşeni; FAB ve Modal'ı render eder, useState ile modal açma/kapama state'ini yönetir.",
+    desc: "Kök UI bileşeni; FAB ve Modal'ı render eder, useState ile modal açma/kapama state'ini yönetir. FAB sadece evrak tarandığında ve modal kapalıyken görünür.",
     imports: [
       "useState (preact/hooks)",
       "Fab (@components/ui/Fab)",
       "Modal (@components/ui/Modal)",
-      "Sidebar (@components/layout/Sidebar)"
+      "Sidebar (@components/layout/Sidebar)",
+      "evraklar (@store)"
     ],
     vars: [],
     consts: [],
@@ -755,20 +759,27 @@ const FILES = {
   },
   "src/styles/sidebar.css": {
     path: "src/styles/sidebar.css",
-    desc: "Content script için CSS; FAB, Modal overlay, panel layout, scrollbar ve progress bar animasyon stilleri.",
+    desc: "Content script için CSS; FAB (pulse animasyonlu), Modal overlay, panel layout, scrollbar ve progress bar animasyon stilleri. z-index: FAB 10106, Modal 10107.",
     imports: [],
     vars: [],
     consts: [],
     funcs: [],
     extra: {
-      title: "CSS Sınıfları",
+      title: "CSS Sınıfları ve Animasyonlar",
       items: [
-        ".uyap-ext-panel (panel layout, flex column)",
-        ".uyap-ext-fab (fixed, sağ alt, 56x56, yuvarlak, mavi)",
-        ".uyap-ext-modal-overlay (fixed, tam ekran, siyah overlay)",
-        ".uyap-ext-modal (beyaz kutu, 400px, rounded)",
-        ".uyap-ext-modal-content (scroll alanı)",
-        ".uyap-progress-bar-animated (çizgili animasyon)"
+        ".uyap-ext-panel (panel layout, flex column, reset)",
+        ".uyap-ext-fab (fixed, right:20px, bottom:270px, z:10106, 56x56, yuvarlak, mavi)",
+        ".uyap-ext-fab--pulse (entry + pulse animasyon chained, ilk tiklamada kalkar)",
+        ".uyap-ext-fab:hover (scale 1.05, animasyon durur)",
+        ".uyap-ext-modal-overlay (fixed, inset:0, z:10107, siyah overlay)",
+        ".uyap-ext-modal (beyaz kutu, 400px, max-height:80vh, rounded)",
+        ".uyap-ext-modal-content (scroll alani)",
+        ".uyap-progress-bar-animated (cizgili animasyon, 45deg gradient)",
+        "@keyframes uyap-fab-enter (opacity + translateY + scale)",
+        "@keyframes uyap-fab-pulse (box-shadow pulse, 2s infinite)",
+        "@keyframes uyap-progress (background-position linear, 1s infinite)",
+        "@media (max-width: 768px) FAB 48x48, right:12px, bottom:180px",
+        "@media (max-width: 480px) FAB 44x44, right:8px, bottom:160px"
       ]
     }
   },

@@ -35,7 +35,8 @@ export default defineManifest({
     {
       matches: ['https://*.uyap.gov.tr/*'],
       js: ['src/content/index.tsx'],
-      run_at: 'document_end'
+      run_at: 'document_end',
+      all_frames: true
     }
   ],
 

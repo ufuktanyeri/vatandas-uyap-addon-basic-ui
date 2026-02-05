@@ -22,9 +22,9 @@ Chrome Extension (Manifest V3) for bulk-downloading court case documents from UY
 
 ### Three execution contexts
 
-1. **Content Script** (`src/content/`) — Injected into UYAP pages. Uses MutationObserver to detect the file modal, scans DOM for evrak metadata, renders a Preact FAB+Modal UI, orchestrates downloads via promise-based tracking.
+1. **Content Script** (`src/content/`) — Injected into all UYAP frames (`all_frames: true`). FAB renders immediately on page load. MutationObserver detects the file modal, triggers evrak scanning and signal population. Downloads use direct `fetch()` with retry (max 2, exponential backoff).
 
-2. **Background Service Worker** (`src/background/`) — Intercepts Chrome downloads via `chrome.downloads.onCreated`, matches them to queued metadata (FIFO), validates files with magic byte detection, moves files to user-selected directory via File System Access API, stores `FileSystemDirectoryHandle` in IndexedDB.
+2. **Background Service Worker** (`src/background/`) — Receives base64 file data via `WRITE_FILE` message, writes files to user-selected directory via File System Access API, stores `FileSystemDirectoryHandle` in IndexedDB.
 
 3. **Popup** (`src/popup/`) — Folder picker (File System Access API) and extension settings.
 
@@ -49,6 +49,8 @@ All reactive state lives in `src/store/signals.ts` using Preact Signals. Compute
 - **WAF protection** — minimum 300ms delay between download requests (configurable 300–2000ms).
 - **Deduplication** — DOM contains ~352 spans but only ~206 unique evrak_ids. Deduplicate with Set. Skip "Son 20 Evrak" folder.
 - **yargiTuru fallback chain:** `window.dosya_bilgileri.yargiTuru` → `#yargiTuru` select element → default `'1'`.
+- **Pagination** — Large cases may have multiple filetree pages. `detectPagination()` checks for "Toplam X sayfadan Y. sayfa" text and warns via `paginationInfo` signal.
+- **UYAP uses iframes** — Content script must run with `all_frames: true` to inject into all frames.
 
 ## Magic byte signatures
 
@@ -61,7 +63,7 @@ All reactive state lives in `src/store/signals.ts` using Preact Signals. Compute
 
 ## Tailwind CSS
 
-Custom prefix `uyap-` is configured to avoid class name collisions with UYAP's existing styles. All utility classes must use this prefix (e.g., `uyap-flex`, `uyap-bg-blue-500`).
+Custom prefix `uyap-` is configured to avoid class name collisions with UYAP's existing styles. All utility classes must use this prefix (e.g., `uyap-flex`, `uyap-bg-blue-500`). `preflight: false` prevents Tailwind's CSS reset from overriding UYAP styles.
 
 ## Messaging pattern
 

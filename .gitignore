@@ -38,3 +38,6 @@ dist-ssr
 # Notes and drafts
 .md/
 RESPONSE.md
+
+# Vite temp files
+*.timestamp-*

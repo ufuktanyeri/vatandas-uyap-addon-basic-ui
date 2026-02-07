@@ -2,7 +2,7 @@ import { useState, useEffect } from 'preact/hooks';
 import { sendToBackground, DEFAULT_SETTINGS } from '@lib';
 import type { Settings } from '@/types';
 import { Button } from '@components/ui/Button';
-import { useToast } from '@hooks/useToast';
+import { useToast } from '../hooks/useToast';
 
 export function Popup() {
   const [directorySelected, setDirectorySelected] = useState(false);

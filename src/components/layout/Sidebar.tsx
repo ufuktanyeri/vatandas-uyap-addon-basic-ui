@@ -12,7 +12,7 @@ import {
 import { Downloader } from '@content/downloader';
 import { EvrakList } from '@components/evrak/EvrakList';
 import { ProgressBar, SessionAlert, Button, Icon } from '@components';
-import { useToast } from '@hooks/useToast';
+import { useToast } from '../../hooks/useToast';
 
 interface SidebarProps {
   onClose: () => void;

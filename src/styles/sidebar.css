@@ -439,47 +439,47 @@
 }
 
 .uyap-ext-btn--primary {
-  background-color: var(--uyap-color-primary);
-  color: var(--uyap-color-bg-white);
-  border-color: var(--uyap-color-primary);
+  background-color: var(--uyap-color-primary) !important;
+  color: var(--uyap-color-bg-white) !important;
+  border-color: var(--uyap-color-primary) !important;
 }
 
 .uyap-ext-btn--primary:hover:not(:disabled) {
-  background-color: var(--uyap-color-primary-hover);
-  border-color: var(--uyap-color-primary-hover);
+  background-color: var(--uyap-color-primary-hover) !important;
+  border-color: var(--uyap-color-primary-hover) !important;
 }
 
 .uyap-ext-btn--secondary {
-  background-color: var(--uyap-color-bg-white);
-  color: var(--uyap-color-button-secondary-text);
-  border-color: var(--uyap-color-border-gray-dark);
+  background-color: var(--uyap-color-bg-white) !important;
+  color: var(--uyap-color-button-secondary-text) !important;
+  border-color: var(--uyap-color-border-gray-dark) !important;
 }
 
 .uyap-ext-btn--secondary:hover:not(:disabled) {
-  background-color: var(--uyap-color-bg-gray-50);
-  border-color: var(--uyap-color-border-gray-darker);
+  background-color: var(--uyap-color-bg-gray-50) !important;
+  border-color: var(--uyap-color-border-gray-darker) !important;
 }
 
 .uyap-ext-btn--warning {
-  background-color: var(--uyap-color-warning);
-  color: var(--uyap-color-bg-white);
-  border-color: var(--uyap-color-warning);
+  background-color: var(--uyap-color-warning) !important;
+  color: var(--uyap-color-bg-white) !important;
+  border-color: var(--uyap-color-warning) !important;
 }
 
 .uyap-ext-btn--warning:hover:not(:disabled) {
-  background-color: var(--uyap-color-warning-hover);
-  border-color: var(--uyap-color-warning-hover);
+  background-color: var(--uyap-color-warning-hover) !important;
+  border-color: var(--uyap-color-warning-hover) !important;
 }
 
 .uyap-ext-btn--danger {
-  background-color: var(--uyap-color-error);
-  color: var(--uyap-color-bg-white);
-  border-color: var(--uyap-color-error);
+  background-color: var(--uyap-color-error) !important;
+  color: var(--uyap-color-bg-white) !important;
+  border-color: var(--uyap-color-error) !important;
 }
 
 .uyap-ext-btn--danger:hover:not(:disabled) {
-  background-color: var(--uyap-color-error-hover);
-  border-color: var(--uyap-color-error-hover);
+  background-color: var(--uyap-color-error-hover) !important;
+  border-color: var(--uyap-color-error-hover) !important;
 }
 
 .uyap-ext-btn--sm {

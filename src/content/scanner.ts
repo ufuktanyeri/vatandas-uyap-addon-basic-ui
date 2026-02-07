@@ -7,14 +7,63 @@ import {
 } from '@lib';
 
 /**
+ * Find dosyaId from page HTML
+ * CRITICAL: Uses regex on document.body.innerHTML (v1 approach)
+ * Fallback: Parse jQuery event handler if available
+ */
+export function findDosyaId(): string | null {
+  // Approach 1: HTML regex (v1 mantığı - en güvenilir)
+  const htmlMatch = document.body.innerHTML.match(/dosyaId\s*=\s*['"]?(\d+)['"]?/);
+  if (htmlMatch?.[1]) {
+    return htmlMatch[1];
+  }
+
+  // Approach 2: jQuery event handler parse (solution.txt mantığı)
+  try {
+    const fileSpan = document.querySelector<HTMLElement>('span.file[evrak_id]');
+    if (fileSpan && typeof (window as any).jQuery !== 'undefined') {
+      const jQuery = (window as any).jQuery;
+      const events = jQuery._data?.(fileSpan, 'events');
+
+      if (events?.dblclick?.[0]) {
+        const handlerStr = events.dblclick[0].handler.toString();
+        const match = handlerStr.match(/downloadDoc\([^,]+,\s*['"]([^'"]+)['"]/);
+        if (match?.[1]) {
+          return match[1];
+        }
+      }
+    }
+  } catch (err) {
+    console.warn('jQuery event parse failed:', err);
+  }
+
+  console.warn('dosyaId not found');
+  return null;
+}
+
+/**
  * Get yargiTuru with fallback chain
  * CRITICAL: yargiTuru can be empty in UYAP, so we use a fallback chain
  */
 export function getYargiTuru(): string {
-  // Fallback 1: Check global dosya_bilgileri object
-  const fromGlobal = (window as any).dosya_bilgileri?.yargiTuru;
-  if (fromGlobal && fromGlobal.trim() !== '') {
-    return fromGlobal.trim();
+  // Fallback 1: jQuery event handler parse (solution.txt mantığı)
+  try {
+    const fileSpan = document.querySelector<HTMLElement>('span.file[evrak_id]');
+    if (fileSpan && typeof (window as any).jQuery !== 'undefined') {
+      const jQuery = (window as any).jQuery;
+      const events = jQuery._data?.(fileSpan, 'events');
+
+      if (events?.dblclick?.[0]) {
+        const handlerStr = events.dblclick[0].handler.toString();
+        // downloadDoc(evrakId, dosyaId, yargiTuru) pattern
+        const match = handlerStr.match(/downloadDoc\([^,]+,\s*[^,]+,\s*['"]([^'"]+)['"]/);
+        if (match?.[1] && match[1].trim() !== '') {
+          return match[1].trim();
+        }
+      }
+    }
+  } catch (err) {
+    console.warn('jQuery yargiTuru parse failed:', err);
   }
 
   // Fallback 2: Check #yargiTuru select element
@@ -39,34 +88,35 @@ export function findKisiAdi(): string {
     return sanitizeName(headerEl.textContent.trim());
   }
 
-  // Fallback to global object
-  const fromGlobal = (window as any).dosya_bilgileri?.kisiAdi;
-  if (fromGlobal && fromGlobal.trim() !== '') {
-    return sanitizeName(fromGlobal.trim());
+  // Fallback: HTML search
+  const adElement = document.getElementById('ad');
+  if (adElement?.textContent) {
+    return sanitizeName(adElement.textContent.trim());
   }
 
   return 'Bilinmeyen';
 }
 
 /**
- * Get dosya bilgileri from global UYAP object
+ * Get dosya bilgileri from DOM (not from global object!)
+ * CRITICAL: No window.dosya_bilgileri access - fully DOM-based
  */
 export function getDosyaBilgileri(): DosyaBilgileri | null {
-  const globalData = (window as any).dosya_bilgileri;
+  const dosyaId = findDosyaId();
 
-  if (!globalData) {
-    console.error('dosya_bilgileri global object not found');
+  if (!dosyaId) {
+    console.error('dosyaId not found in page');
     return null;
   }
 
+  // Extract dosyaNo from page if available
+  const dosyaNoMatch = document.body.innerHTML.match(/Dosya\s+No\s*:?\s*([^\s<]+)/i);
+  const dosyaNo = dosyaNoMatch?.[1] || '';
+
   return {
-    dosyaId: globalData.dosyaId || '',
-    dosyaNo: globalData.dosyaNo || '',
-    birimId: globalData.birimId || '',
-    birimAdi: globalData.birimAdi || '',
-    dosyaTurKod: globalData.dosyaTurKod || '',
-    yargiTuru: getYargiTuru(),
-    dosyaDurumu: globalData.dosyaDurumu || ''
+    dosyaId,
+    dosyaNo,
+    yargiTuru: getYargiTuru()
   };
 }
 

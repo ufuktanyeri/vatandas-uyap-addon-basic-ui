@@ -7,15 +7,11 @@ export interface EvrakItem {
   evrakTarihi?: string;
 }
 
-// Dosya bilgisi (UYAP global object)
+// Dosya bilgisi (DOM-based, simplified)
 export interface DosyaBilgileri {
-  dosyaId: string;
-  dosyaNo: string;              // "2024/1234"
-  birimId: string;
-  birimAdi: string;
-  dosyaTurKod: string;
-  yargiTuru: string;            // Boş olabilir!
-  dosyaDurumu: string;
+  dosyaId: string;              // Required - from HTML regex or jQuery event
+  dosyaNo: string;              // Optional - from HTML search
+  yargiTuru: string;            // Required - from jQuery event or select element
 }
 
 // Pagination bilgisi (UYAP filetree sayfalama)
@@ -134,4 +130,17 @@ export type MessageType =
 export interface Message<T = any> {
   type: MessageType;
   payload?: T;
+}
+
+// Global type declarations for UYAP page
+declare global {
+  interface Window {
+    // UYAP native download function (used in solution.txt approach)
+    downloadDoc?: (evrakId: string, dosyaId: string, yargiTuru: string) => void;
+
+    // jQuery (if available)
+    jQuery?: {
+      _data?: (element: Element, key: string) => any;
+    };
+  }
 }

@@ -24,34 +24,8 @@ let appContainer: HTMLDivElement | null = null;
 let isInitialized = false;
 
 /**
- * Wait for UYAP dosya_bilgileri global object to become available
- * This object is only set when a specific case/dosya is opened,
- * NOT on the main portal page.
- */
-function waitForDosyaBilgileri(timeout = 10000): Promise<void> {
-  return new Promise((resolve, reject) => {
-    const startTime = Date.now();
-
-    const check = () => {
-      if ((window as any).dosya_bilgileri) {
-        resolve();
-        return;
-      }
-
-      if (Date.now() - startTime > timeout) {
-        reject(new Error("dosya_bilgileri not available - not a dosya detail page"));
-        return;
-      }
-
-      setTimeout(check, 500);
-    };
-
-    check();
-  });
-}
-
-/**
  * Initialize the extension when UYAP modal is detected
+ * CRITICAL: No window.dosya_bilgileri access - fully DOM-based
  */
 async function initExtension() {
   if (isInitialized) {
@@ -65,11 +39,7 @@ async function initExtension() {
   try {
     console.log("Initializing extension...");
 
-    // Wait for dosya_bilgileri to be available first
-    // This ensures we're on a dosya detail page, not the main portal
-    await waitForDosyaBilgileri(10000);
-
-    // Wait for filetree to load with longer timeout
+    // Wait for filetree to load
     await waitForFiletree(30000);
 
     // Scan filetree
@@ -86,8 +56,11 @@ async function initExtension() {
       );
     }
 
-    // Get dosya bilgileri
+    // Get dosya bilgileri (DOM-based, no window.dosya_bilgileri)
     const dosya = getDosyaBilgileri();
+    if (!dosya) {
+      throw new Error('Dosya bilgileri bulunamadı - dosyaId sayfada yok');
+    }
     dosyaBilgileri.value = dosya;
 
     // Get kisi adi and store in signal (used by export manifest)
@@ -97,6 +70,8 @@ async function initExtension() {
     console.log("Extension initialized:", {
       evrakCount: scannedEvraklar.length,
       dosyaNo: dosya?.dosyaNo,
+      dosyaId: dosya?.dosyaId,
+      yargiTuru: dosya?.yargiTuru,
       kisiAdi: kisiAdiValue,
     });
   } catch (error) {

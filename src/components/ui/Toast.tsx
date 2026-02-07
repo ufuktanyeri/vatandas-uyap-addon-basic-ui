@@ -1,3 +1,5 @@
+import { Icon } from '@components';
+
 export type ToastType = 'error' | 'success';
 
 export interface ToastState {
@@ -5,18 +7,21 @@ export interface ToastState {
   type: ToastType;
 }
 
-const typeClasses: Record<ToastType, string> = {
-  error: 'uyap-bg-red-50 uyap-text-red-800',
-  success: 'uyap-bg-green-50 uyap-text-green-800'
-};
-
 export function Toast({ notification }: { notification: ToastState | null }) {
   if (!notification) {
     return null;
   }
 
+  const typeClass = notification.type === 'error'
+    ? 'uyap-ext-toast--error'
+    : 'uyap-ext-toast--success';
+
   return (
-    <div class={`uyap-px-4 uyap-py-2 uyap-text-sm ${typeClasses[notification.type]}`}>
+    <div class={`uyap-ext-toast ${typeClass}`}>
+      <Icon
+        name={notification.type === 'error' ? 'errorCircle' : 'success'}
+        class="uyap-ext-icon-spacing"
+      />
       {notification.message}
     </div>
   );

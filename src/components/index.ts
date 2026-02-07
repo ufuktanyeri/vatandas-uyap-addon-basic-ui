@@ -5,6 +5,8 @@ export { Modal } from './ui/Modal';
 export { Fab, resetFabPulse } from './ui/Fab';
 export { ProgressBar } from './ui/ProgressBar';
 export { SessionAlert } from './ui/SessionAlert';
+export { Icon } from './ui/Icon';
+export type { IconName } from './ui/Icon';
 export { Sidebar } from './layout/Sidebar';
 export { EvrakCard } from './evrak/EvrakCard';
 export { EvrakList } from './evrak/EvrakList';

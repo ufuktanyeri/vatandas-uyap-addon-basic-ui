@@ -7,20 +7,18 @@ export function EvrakList() {
   const delta = deltaInfo.value;
 
   if (groups.size === 0) {
-    return <EmptyState message="Evrak bulunamadı" />;
+    return <EmptyState message="Evrak bulunamadi" />;
   }
 
   return (
-    <div class="uyap-flex-1 uyap-overflow-y-auto">
+    <>
       {/* Delta info */}
       {delta.mevcut > 0 && (
-        <div class="uyap-p-3 uyap-bg-blue-50 uyap-border-b uyap-border-blue-100">
-          <p class="uyap-text-sm uyap-text-blue-800">
+        <div class="uyap-ext-delta">
+          <p>
             <strong>{delta.yeni}</strong> yeni evrak bulundu
             {delta.mevcut > 0 && (
-              <span class="uyap-ml-1">
-                ({delta.mevcut} evrak zaten indirilmiş)
-              </span>
+              <span> ({delta.mevcut} evrak zaten indirilmis)</span>
             )}
           </p>
         </div>
@@ -36,6 +34,6 @@ export function EvrakList() {
           />
         ))}
       </div>
-    </div>
+    </>
   );
 }

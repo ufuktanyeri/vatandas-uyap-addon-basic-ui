@@ -1,14 +1,11 @@
-import type { ComponentChildren } from 'preact';
-
 interface EmptyStateProps {
   message: string;
-  icon?: ComponentChildren;
 }
 
-export function EmptyState({ message, icon }: EmptyStateProps) {
+export function EmptyState({ message }: EmptyStateProps) {
   return (
-    <div class="uyap-p-8 uyap-text-center uyap-text-gray-500">
-      {icon && <div class="uyap-mb-2">{icon}</div>}
+    <div class="uyap-ext-empty">
+      <i class="fa fa-inbox"></i>
       <p>{message}</p>
     </div>
   );

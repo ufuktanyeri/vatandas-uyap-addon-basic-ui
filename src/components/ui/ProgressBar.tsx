@@ -1,4 +1,5 @@
 import { indirmeDurumu, indirmeYuzdesi } from '@store';
+import { Icon } from '@components';
 
 export function ProgressBar() {
   const durumu = indirmeDurumu.value;
@@ -10,38 +11,39 @@ export function ProgressBar() {
 
   const { completedCount = 0, totalCount = 0, failedCount = 0 } = durumu;
 
+  const barClass = durumu.status === 'downloading'
+    ? 'uyap-ext-progress__bar--downloading uyap-ext-progress__bar--animated'
+    : durumu.status === 'completed'
+    ? 'uyap-ext-progress__bar--completed'
+    : durumu.status === 'error'
+    ? 'uyap-ext-progress__bar--error'
+    : 'uyap-ext-progress__bar--paused';
+
   return (
-    <div class="uyap-p-4 uyap-border-t uyap-border-gray-200">
-      <div class="uyap-flex uyap-justify-between uyap-text-sm uyap-mb-2">
-        <span class="uyap-font-medium">İndirme İlerlemesi</span>
-        <span class="uyap-text-gray-600">
+    <div class="uyap-ext-progress">
+      <div class="uyap-ext-progress__header">
+        <span class="uyap-ext-progress__label">Indirme Ilerlemesi</span>
+        <span class="uyap-ext-progress__value">
           {completedCount}/{totalCount} ({yuzde}%)
         </span>
       </div>
 
-      <div class="uyap-w-full uyap-bg-gray-200 uyap-rounded-full uyap-h-2.5 uyap-mb-2">
+      <div class="uyap-ext-progress__track">
         <div
-          class={`uyap-h-2.5 uyap-rounded-full uyap-transition-all ${
-            durumu.status === 'downloading'
-              ? 'uyap-bg-blue-600 uyap-progress-bar-animated'
-              : durumu.status === 'completed'
-              ? 'uyap-bg-green-600'
-              : durumu.status === 'error'
-              ? 'uyap-bg-red-600'
-              : 'uyap-bg-gray-400'
-          }`}
+          class={`uyap-ext-progress__bar ${barClass}`}
           style={{ width: `${yuzde}%` }}
         />
       </div>
 
       {failedCount > 0 && (
-        <div class="uyap-text-xs uyap-text-red-600">
+        <div class="uyap-ext-progress__error">
+          <Icon name="warning" class="uyap-ext-icon-spacing-sm" />
           {failedCount} evrak indirilemedi
         </div>
       )}
 
       {durumu.status === 'error' && durumu.error && (
-        <div class="uyap-text-xs uyap-text-red-600 uyap-mt-1">
+        <div class="uyap-ext-progress__error">
           Hata: {durumu.error}
         </div>
       )}
